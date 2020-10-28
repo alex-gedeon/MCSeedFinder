@@ -17,9 +17,9 @@ endif
 all: release
 
 debug: CFLAGS += -DDEBUG -O0 -ggdb3
-debug: libcubiomes find_quadhuts find_compactbiomes
+debug: libcubiomes find_quadhuts find_compactbiomes image_generator
 release: CFLAGS += -O3 -march=native
-release: libcubiomes find_quadhuts find_compactbiomes
+release: libcubiomes find_quadhuts find_compactbiomes image_generator
 
 libcubiomes: CFLAGS += -fPIC
 libcubiomes: layers.o generator.o finders.o util.o
@@ -37,7 +37,7 @@ find_quadhuts: find_quadhuts.o layers.o generator.o finders.o
 find_quadhuts.o: find_quadhuts.c
 	$(CC) -c $(CFLAGS) $<
 
-img: sample_img.o layers.o generator.o finders.o util.o
+image_generator: image_generator.o layers.o generator.o finders.o util.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 finders.o: finders.c finders.h
@@ -52,9 +52,9 @@ layers.o: layers.c layers.h
 util.o: util.c util.h
 	$(CC) -c $(CFLAGS) $<
 
-img.o: sample_img.c util.h generator.h
+image_generator.o: image_generator.c util.h generator.h
 	$(CC) -c $(CFLAGS) $<
 	
 clean:
-	$(RM) *.o libcubiomes.a find_quadhuts find_compactbiomes
+	$(RM) *.o libcubiomes.a find_quadhuts find_compactbiomes image_generator
 

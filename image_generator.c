@@ -1,8 +1,21 @@
 #include "generator.h"
 #include "util.h"
+#include <stdio.h>
 
-int main()
-{
+int main(int argc, char *argv[]) {
+
+    // Parse args
+    //   argv[1]: seed
+    //   argv[2]: folder to save in
+
+    if( argc != 3 ) {
+        printf("Invalid arguments, choices:\n");
+        printf("  argv[1]: seed");
+        printf("  argv[2]: folder to save in");
+        exit(1);
+    }
+
+
     unsigned char biomeColours[256][3];
 
     // Initialize global biome table.
