@@ -1,6 +1,20 @@
 #include "generator.h"
 #include "util.h"
 #include <stdio.h>
+#include <string.h>
+
+int64_t S64(const char *s) {
+  int64_t i;
+  char c ;
+  int scanned = sscanf(s, "%" SCNd64 "%c", &i, &c);
+  if (scanned == 1) return i;
+  if (scanned > 1) {
+    // TBD about extra data found
+    return i;
+    }
+  // TBD failed to scan;  
+  return 0;  
+}
 
 int main(int argc, char *argv[]) {
 
@@ -10,10 +24,15 @@ int main(int argc, char *argv[]) {
 
     if( argc != 3 ) {
         printf("Invalid arguments, choices:\n");
-        printf("  argv[1]: seed");
-        printf("  argv[2]: folder to save in");
+        printf("  argv[1]: seed\n");
+        printf("  argv[2]: folder to save in\n");  // assumed to exist beforehand
         exit(1);
     }
+
+    char * combined_path = (char *) malloc(strlen(argv[1]) + strlen(argv[2]) + 1);
+    strcat(combined_path, argv[2]);
+    strcat(combined_path, argv[1]);
+    strcat(combined_path, ".ppm");
 
 
     unsigned char biomeColours[256][3];
@@ -29,9 +48,9 @@ int main(int argc, char *argv[]) {
     // Extract the desired layer.
     Layer *layer = &g.layers[L_SHORE_16];
 
-    int64_t seed = 1661454332289;
-    int areaX = -60, areaZ = -60;
-    unsigned int areaWidth = 120, areaHeight = 120;
+    int64_t seed = S64(argv[1]);
+    int areaX = -512, areaZ = -256;
+    unsigned int areaWidth = 1024, areaHeight = 512;
     unsigned int scale = 4;
     unsigned int imgWidth = areaWidth*scale, imgHeight = areaHeight*scale;
 
@@ -45,11 +64,12 @@ int main(int argc, char *argv[]) {
 
     // Map the biomes to a color buffer and save to an image.
     biomesToImage(rgb, biomeColours, biomeIds, areaWidth, areaHeight, scale, 2);
-    savePPM("biomes_at_layer.ppm", rgb, imgWidth, imgHeight);
+    savePPM(combined_path, rgb, imgWidth, imgHeight);
 
     // Clean up.
     free(biomeIds);
     free(rgb);
+    free(combined_path);
 
     return 0;
 }
