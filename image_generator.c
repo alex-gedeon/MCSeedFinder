@@ -22,18 +22,25 @@ int main(int argc, char *argv[]) {
     //   argv[1]: seed
     //   argv[2]: folder to save in
 
-    if( argc != 3 ) {
+    if( argc != 5 ) {
         printf("Invalid arguments, choices:\n");
         printf("  argv[1]: seed\n");
         printf("  argv[2]: folder to save in\n");  // assumed to exist beforehand
+        printf("  argv[3]: areaX, ex: 512\n");
+        printf("  argv[4]: areaY, ex: 256\n");
         exit(1);
     }
 
+    // Parse command line arguments
     char * combined_path = (char *) malloc(strlen(argv[1]) + strlen(argv[2]) + 1);
     strcat(combined_path, argv[2]);
     strcat(combined_path, argv[1]);
     strcat(combined_path, ".ppm");
+    int64_t seed = S64(argv[1]);
 
+    // Get area of map
+    int areaX = -1 * atoi(argv[3]), areaZ = -1 * atoi(argv[4]);
+    unsigned int areaWidth = -2 * areaX, areaHeight = -2 * areaZ;
 
     unsigned char biomeColours[256][3];
 
@@ -48,9 +55,6 @@ int main(int argc, char *argv[]) {
     // Extract the desired layer.
     Layer *layer = &g.layers[L_SHORE_16];
 
-    int64_t seed = S64(argv[1]);
-    int areaX = -512, areaZ = -256;
-    unsigned int areaWidth = 1024, areaHeight = 512;
     unsigned int scale = 4;
     unsigned int imgWidth = areaWidth*scale, imgHeight = areaHeight*scale;
 
