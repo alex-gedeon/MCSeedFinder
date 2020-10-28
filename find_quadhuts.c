@@ -65,12 +65,12 @@ int main(int argc, char *argv[])
         //     printf("MC version not specified. Defaulting to 1.16\n");
         // }
     }
-    else
-    {
-        printf("Usage:\n"
-               "find_quadhuts [regionX] [regionZ] [mcversion]\n"
-               "Defaulting to origin.\n\n");
-    }
+    // else
+    // {
+    //     printf("Usage:\n"
+    //            "find_quadhuts [regionX] [regionZ] [mcversion]\n"
+    //            "Defaulting to origin.\n\n");
+    // }
 
     regPosX -= 1;
     regPosZ -= 1;
@@ -86,11 +86,11 @@ int main(int argc, char *argv[])
 
     setupGenerator(&g, mcversion);
     
-#if defined(_WIN32)
-    _mkdir("./seeds");
-#else 
-    mkdir("./seeds", 0773);
-#endif
+// #if defined(_WIN32)
+//     _mkdir("./seeds");
+// #else 
+//     mkdir("./seeds", 0773);
+// #endif
 
 #if 0
     sprintf(seedFileName, "./seeds/quadbase_ideal_%d.txt", featureConfig.salt);
@@ -112,8 +112,8 @@ int main(int argc, char *argv[])
 
     if (access(seedFileName, F_OK))
     {
-        printf("Seed base file does not exist: Creating new one.\n"
-               "This can take a while...\n");
+        // printf("Seed base file does not exist: Creating new one.\n"
+        //        "This can take a while...\n");
         int threads = 6;
         search4QuadBases(seedFileName, threads, featureConfig, radius, lbitset);
     }
