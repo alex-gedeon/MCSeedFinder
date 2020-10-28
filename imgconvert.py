@@ -11,6 +11,8 @@ def convert_ppm_to_png(seed, folder, xsize=512, ysize=256):
         os.makedirs(os.path.dirname(folder))
     ppm_filepath = folder + str(seed)
 
+    print(folder)
+
     # Call c binary to generate ppm
     os.system(f'./image_generator {seed} {folder}/ {xsize} {ysize}')
 
@@ -19,4 +21,4 @@ def convert_ppm_to_png(seed, folder, xsize=512, ysize=256):
     im.save(f'{ppm_filepath}.png')
     os.remove(f'{ppm_filepath}.ppm')
 
-convert_ppm_to_png(124, "temp3")
+convert_ppm_to_png(124, "quad_scans/qddadsffdsafdsad/")

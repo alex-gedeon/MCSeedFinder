@@ -32,10 +32,10 @@ int main(int argc, char *argv[]) {
     }
 
     // Parse command line arguments
-    char * combined_path = (char *) malloc(strlen(argv[1]) + strlen(argv[2]) + 1);
-    strcat(combined_path, argv[2]);
-    strcat(combined_path, argv[1]);
-    strcat(combined_path, ".ppm");
+    char massive_string[1000];  // Probably a better way to do this
+    strcat(massive_string, argv[2]);
+    strcat(massive_string, argv[1]);
+    strcat(massive_string, ".ppm");
     int64_t seed = S64(argv[1]);
 
     // Get area of map
@@ -68,12 +68,11 @@ int main(int argc, char *argv[]) {
 
     // Map the biomes to a color buffer and save to an image.
     biomesToImage(rgb, biomeColours, biomeIds, areaWidth, areaHeight, scale, 2);
-    savePPM(combined_path, rgb, imgWidth, imgHeight);
+    savePPM(massive_string, rgb, imgWidth, imgHeight);
 
     // Clean up.
     free(biomeIds);
     free(rgb);
-    free(combined_path);
 
     return 0;
 }

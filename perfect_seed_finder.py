@@ -58,6 +58,24 @@ def filter_quadseeds(quadfile):
         process.join()
 
     print(f"Searched {even_split * num_processes} seeds!")
+    return outfile
+
+def convert_ppm_to_png(seed, folder, xsize=512, ysize=256):
+    """Create png image given seed and folder."""
+
+    # Create folder, make sure it exists
+    folder = folder.strip().rstrip('/') + "/"
+    if not os.path.exists(os.path.dirname(folder)):
+        os.makedirs(os.path.dirname(folder))
+    ppm_filepath = folder + str(seed)
+
+    # Call c binary to generate ppm
+    os.system(f'./image_generator {seed} {folder}/ {xsize} {ysize}')
+
+    # Convert ppm to png, remove ppm to save space
+    im = Image.open(f'{ppm_filepath}.ppm')
+    im.save(f'{ppm_filepath}.png')
+    os.remove(f'{ppm_filepath}.ppm')
 
 @click.command()
 @click.argument('qx', type=int, required=True)
@@ -88,20 +106,18 @@ def main(qx, qy, search_time):
         
     ########### Step 2: Filter Seeds ###########
 
-    filter_quadseeds(quadfile)
+    filtered_file = filter_quadseeds(quadfile)
 
     ########### Step 3: Create Images ###########
 
+    img_path = f'quad_scans/quadseeds_{qx}x{qy}y_images/'
+    if not os.path.exists(img_path):
+        os.mkdir(img_path)
+    with open(filtered_file) as flfile:
+        for line in flfile:
+            convert_ppm_to_png(line.strip(), img_path)
 
 
-        
-
-
-# step 2: filter seeds
-
-# run code in quad verifier
-
-# step 3: generate images
 
 if __name__ == '__main__':
     main()  # pylint: disable=no-value-for-parameter
