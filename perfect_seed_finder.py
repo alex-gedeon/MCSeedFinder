@@ -42,7 +42,11 @@ def filter_quadseeds(quadfile, outfile):
     processpool = []
     # Create a process for each split, split into even chunks
     for idx in range(num_processes):
-        a = mp.Process(target=search_seeds, args=[quads[idx*even_split:idx*even_split + even_split]])
+        # If last index, give rest
+        if idx == num_processes - 1:
+            a = mp.Process(target=search_seeds, args=[quads[idx*even_split:]])
+        else:
+            a = mp.Process(target=search_seeds, args=[quads[idx*even_split:idx*even_split + even_split]])
         a.start()
         processpool.append(a)
 
@@ -88,7 +92,12 @@ def convert_all_ppm_to_png(seedlist, folder, xsize=512, ysize=256):
 
     # Create a process for each split, split into even chunks
     for idx in range(num_processes):
-        a = mp.Process(target=convert_batch_ppm, args=[seedlist[idx*even_split:idx*even_split + even_split]])
+        # If last index, give rest
+        if idx == num_processes - 1:
+            a = mp.Process(target=convert_batch_ppm, args=[seedlist[idx*even_split:]])
+        else:
+            a = mp.Process(target=convert_batch_ppm, args=[seedlist[idx*even_split:idx*even_split + even_split]])
+            
         a.start()
         processpool.append(a)
 
@@ -130,7 +139,7 @@ def main(qx, qy, search_time, force):
 
     # Remove existing filtered file if exists
     run_scan = True
-    if os.path.exists(filtered_file):
+    if os.path.exists(filtered_file) and not force:
         rerun = input("Filter quadfile already exists, rerun anyways? (y/n): ")
         while rerun not in ['y', 'n']:
             rerun = input("Filter quadfile already exists, rerun anyways? (y/n): ")
