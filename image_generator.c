@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Parse command line arguments
-    char massive_string[1000];  // Probably a better way to do this
+    char massive_string[1000] = "";  // Probably a better way to do this
     strcat(massive_string, argv[2]);
     strcat(massive_string, argv[1]);
     strcat(massive_string, ".ppm");

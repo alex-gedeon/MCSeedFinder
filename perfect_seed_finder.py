@@ -1,4 +1,4 @@
-import os, sys, click, subprocess
+import os, sys, click, subprocess, time
 import multiprocessing as mp
 from PIL import Image
 
@@ -71,6 +71,7 @@ def convert_ppm_to_png(seed, folder, xsize=512, ysize=256):
 
     # Call c binary to generate ppm
     os.system(f'./image_generator {seed} {folder}/ {xsize} {ysize}')
+    time.sleep(0.25)
 
     # Convert ppm to png, remove ppm to save space
     im = Image.open(f'{ppm_filepath}.ppm')
@@ -81,7 +82,8 @@ def convert_ppm_to_png(seed, folder, xsize=512, ysize=256):
 @click.argument('qx', type=int, required=True)
 @click.argument('qy', type=int, required=True)
 @click.argument('search_time', type=int, default=3)
-def main(qx, qy, search_time):
+@click.option('--force', type=bool, default=False)
+def main(qx, qy, search_time, force):
 
     ########### Step 1: Generate Seeds ###########
 
@@ -91,10 +93,10 @@ def main(qx, qy, search_time):
     
     # Check if quadfile already exists
     quadfile = f'quad_scans/quadseeds_{qx}x{qy}y.txt'
+    run_scan = True
     if not os.path.exists(quadfile):
         open(quadfile, 'x').close()
-        run_scan = True
-    else:
+    elif not force:
         rerun = input("File already exists, rerun anyways? (y/n): ")
         while rerun not in ['y', 'n']:
             rerun = input("File already exists, rerun anyways? (y/n): ")
@@ -106,6 +108,7 @@ def main(qx, qy, search_time):
         
     ########### Step 2: Filter Seeds ###########
 
+    print("\nFiltering seeds as per generator.h...")
     filtered_file = filter_quadseeds(quadfile)
 
     ########### Step 3: Create Images ###########
@@ -113,9 +116,14 @@ def main(qx, qy, search_time):
     img_path = f'quad_scans/quadseeds_{qx}x{qy}y_images/'
     if not os.path.exists(img_path):
         os.mkdir(img_path)
+    
     with open(filtered_file) as flfile:
-        for line in flfile:
+        lines = flfile.readlines()
+        print(f"\nConverting {len(lines)} filtered seeds to {img_path}")
+        for line in lines:
             convert_ppm_to_png(line.strip(), img_path)
+    
+    print("Done!")
 
 
 
