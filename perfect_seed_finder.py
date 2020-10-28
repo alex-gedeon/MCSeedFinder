@@ -3,17 +3,35 @@ import multiprocessing as mp
 from PIL import Image
 
 
-# step 1: generate seeds
+def scan_quadseeds(qx, qy, search_time, quadfile):
+    process = subprocess.Popen(['./find_quadhuts', str(qx), str(qy)], stdout=open(quadfile, 'w'))
+    try:
+        print(f'Generating quad hut seeds at {qx * 512}, {qy * 512} for {search_time} seconds...')
+        process.wait(timeout=search_time)
+        print('sdaf')
+    except subprocess.TimeoutExpired:
+        process.kill()
 
-# if seedfile already exists, ask user whether to regenerate
-# specify how long to run seeds for
-# call find_quadhuts on user inputted location
-# remove last line in file
+    # Remove last line from file
+    with open(quadfile) as qf:
+        lines = qf.readlines()[:-1]
+        qf.close()
+    
+    with open(quadfile, 'w') as qf:
+        qf.writelines(lines)
+        qf.close()
+    print(f'Generated {len(lines)} quad witch hut seeds!')
+
+def filter_quadseeds():
+    pass
+
 @click.command()
 @click.argument('qx', type=int, required=True)
 @click.argument('qy', type=int, required=True)
 @click.argument('search_time', type=int, default=3)
 def main(qx, qy, search_time):
+
+    ########### Step 1: Generate Seeds ###########
 
     # Create folder to store quad scan files
     if not os.path.exists('quad_scans/'):
@@ -30,25 +48,13 @@ def main(qx, qy, search_time):
             rerun = input("File already exists, rerun anyways? (y/n): ")
         run_scan = True if rerun == 'y' else False
 
+    # Run the scan on the quadfile if necessary
     if run_scan:
-        # Run the scan on the quadfile
-        process = subprocess.Popen(['./find_quadhuts', str(qx), str(qy)], stdout=open(quadfile, 'w'))
-        try:
-            print(f'Generating quad hut seeds at {qx * 512}, {qy * 512} for {search_time} seconds...')
-            process.wait(timeout=search_time)
-            print('sdaf')
-        except subprocess.TimeoutExpired:
-            process.kill()
-
-        # Remove last line from file
-        with open(quadfile) as qf:
-            lines = qf.readlines()[:-1]
-            qf.close()
+        scan_quadseeds(qx, qy, search_time, quadfile)
         
-        with open(quadfile, 'w') as qf:
-            qf.writelines(lines)
-            qf.close()
-        print('Done!')
+    ########### Step 2: Filter Seeds ###########
+
+
         
 
 

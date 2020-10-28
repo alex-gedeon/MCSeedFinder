@@ -6,3 +6,4 @@ find_quadhuts
 seeds/
 image_generator
 *.a
+quad_scans/
