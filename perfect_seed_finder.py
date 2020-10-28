@@ -1,6 +1,7 @@
 import os, sys, click, subprocess, time
 import multiprocessing as mp
 from PIL import Image, ImageDraw
+from shutil import rmtree
 
 
 def scan_quadseeds(qx, qy, search_time, quadfile):
@@ -22,15 +23,10 @@ def scan_quadseeds(qx, qy, search_time, quadfile):
         qf.close()
     print(f'Generated {len(lines)} quad witch hut seeds!')
 
-def filter_quadseeds(quadfile):
+def filter_quadseeds(quadfile, outfile):
     # Open and sort quadfile
     quads = open(quadfile).readlines()
     quads.sort()
-    outfile = quadfile[:-4] + "_filtered.txt"  # remove .txt and add suffix
-
-    # Remove existing filtered file if exists
-    if os.path.exists(outfile):
-        os.remove(outfile)
 
     # Internal function to search for seeds
     def search_seeds(queue, seedlist):
@@ -99,9 +95,9 @@ def main(qx, qy, search_time, force):
     if not os.path.exists(quadfile):
         open(quadfile, 'x').close()
     elif not force:
-        rerun = input("File already exists, rerun anyways? (y/n): ")
+        rerun = input("Quadfile already exists, rerun anyways? (y/n): ")
         while rerun not in ['y', 'n']:
-            rerun = input("File already exists, rerun anyways? (y/n): ")
+            rerun = input("Quadfile already exists, rerun anyways? (y/n): ")
         run_scan = True if rerun == 'y' else False
 
     # Run the scan on the quadfile if necessary
@@ -109,15 +105,31 @@ def main(qx, qy, search_time, force):
         scan_quadseeds(qx, qy, search_time, quadfile)
         
     ########### Step 2: Filter Seeds ###########
+    
+    filtered_file = quadfile[:-4] + "_filtered.txt"  # remove .txt and add suffix
 
-    print("\nFiltering seeds as per generator.h...")
-    filtered_file = filter_quadseeds(quadfile)
+    # Remove existing filtered file if exists
+    run_scan = True
+    if os.path.exists(filtered_file):
+        rerun = input("Filter quadfile already exists, rerun anyways? (y/n): ")
+        while rerun not in ['y', 'n']:
+            rerun = input("Filter quadfile already exists, rerun anyways? (y/n): ")
+        run_scan = True if rerun == 'y' else False
+    if run_scan:
+        if os.path.exists(filtered_file):
+            os.remove(filtered_file)
+        print("\nFiltering seeds as per generator.h...")
+        filter_quadseeds(quadfile, filtered_file)
 
     ########### Step 3: Create Images ###########
 
+    # Create image path if exists, else delete
     img_path = f'quad_scans/quadseeds_{qx}x{qy}y_images/'
     if not os.path.exists(img_path):
         os.mkdir(img_path)
+    else:
+        rmtree(img_path)
+
     
     with open(filtered_file) as flfile:
         lines = flfile.readlines()
