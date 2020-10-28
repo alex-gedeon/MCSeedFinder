@@ -60,10 +60,10 @@ int main(int argc, char *argv[])
             else
                 mcversion = MC_1_16;
         }
-        else
-        {
-            printf("MC version not specified. Defaulting to 1.16\n");
-        }
+        // else
+        // {
+        //     printf("MC version not specified. Defaulting to 1.16\n");
+        // }
     }
     else
     {

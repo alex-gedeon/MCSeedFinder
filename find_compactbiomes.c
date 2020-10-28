@@ -30,8 +30,8 @@ static DWORD WINAPI searchCompactBiomesThread(LPVOID data)
 
     for (s = info.seedStart; s != info.seedEnd; s++)
     {
-        if (!hasAllTemps(&g, s, 0, 0))
-            continue;
+        // if (!hasAllTemps(&g, s, 0, 0))
+        //     continue;
 
         if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, s, ax, az, w, h, info.filter, 1) > 0)
         {
@@ -110,15 +110,15 @@ int main(int argc, char *argv[])
     if (argc <= 4 || sscanf(argv[4], "%u", &range) != 1) range = 1024;
 
     // TODO: set up a customisable biome filter
-    filter = setupBiomeFilter(BIOMES_L13_OCEAN_MIX_4,
-                sizeof(BIOMES_L13_OCEAN_MIX_4)/sizeof(int));
+    filter = setupBiomeFilter(XAND_BIOMES,
+                sizeof(XAND_BIOMES)/sizeof(int));
     minscale = 1; // terminate search at this layer scale
     // TODO: simple structure filter
     withHut = 0;
     withMonument = 0;
 
-    printf("Starting search through seeds %" PRId64 " to %" PRId64", using %u threads.\n"
-           "Search radius = %u.\n", seedStart, seedEnd, threads, range);
+    // printf("Starting search through seeds %" PRId64 " to %" PRId64", using %u threads.\n"
+    //        "Search radius = %u.\n", seedStart, seedEnd, threads, range);
 
     thread_id_t threadID[threads];
     struct compactinfo_t info[threads];

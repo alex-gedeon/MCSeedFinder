@@ -28,7 +28,7 @@ libcubiomes: layers.o generator.o finders.o util.o
 find_compactbiomes: find_compactbiomes.o layers.o generator.o finders.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-find_compactbiomes.o: find_compactbiomes.c
+find_compactbiomes.o: find_compactbiomes.c generator.h
 	$(CC) -c $(CFLAGS) $<
 
 find_quadhuts: find_quadhuts.o layers.o generator.o finders.o 
@@ -37,6 +37,8 @@ find_quadhuts: find_quadhuts.o layers.o generator.o finders.o
 find_quadhuts.o: find_quadhuts.c
 	$(CC) -c $(CFLAGS) $<
 
+img: sample_img.o layers.o generator.o finders.o util.o
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 finders.o: finders.c finders.h
 	$(CC) -c $(CFLAGS) $<
@@ -50,6 +52,9 @@ layers.o: layers.c layers.h
 util.o: util.c util.h
 	$(CC) -c $(CFLAGS) $<
 
+img.o: sample_img.c util.h generator.h
+	$(CC) -c $(CFLAGS) $<
+	
 clean:
 	$(RM) *.o libcubiomes.a find_quadhuts find_compactbiomes
 

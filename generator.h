@@ -138,6 +138,15 @@ int genArea(const Layer *layer, int *out, int areaX, int areaZ, int areaWidth, i
  * also contain these biomes.
  */
 
+//=======================
+// Custom Biome Tables
+//=======================
+
+static const int XAND_BIOMES[] =
+{
+        shattered_savanna, ice_spikes, badlands
+};
+
 //==============================================================================
 // MC 1.13 Biome Tables
 //==============================================================================
