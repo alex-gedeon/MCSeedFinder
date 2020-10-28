@@ -1,6 +1,6 @@
 import os, sys, click, subprocess, time
 import multiprocessing as mp
-from PIL import Image
+from PIL import Image, ImageDraw
 
 
 def scan_quadseeds(qx, qy, search_time, quadfile):
@@ -75,6 +75,8 @@ def convert_ppm_to_png(seed, folder, xsize=512, ysize=256):
 
     # Convert ppm to png, remove ppm to save space
     im = Image.open(f'{ppm_filepath}.ppm')
+    draw = ImageDraw.Draw(im)
+    draw.rectangle([im.width//2 - 20, im.height//2 - 20, im.width//2 + 20, im.height//2 + 20], width=4, outline="#ff0000")
     im.save(f'{ppm_filepath}.png')
     os.remove(f'{ppm_filepath}.ppm')
 
