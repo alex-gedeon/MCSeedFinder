@@ -1,5 +1,7 @@
 import os, sys, time
 import multiprocessing as mp
+
+
 quads = open('seeds/quad_4k0k.txt').readlines()
 quads.sort()
 

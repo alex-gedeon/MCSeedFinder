@@ -144,7 +144,7 @@ int genArea(const Layer *layer, int *out, int areaX, int areaZ, int areaWidth, i
 
 static const int XAND_BIOMES[] =
 {
-        plains //shattered_savanna, ice_spikes, badlands
+        shattered_savanna, ice_spikes, //badlands
 };
 
 //==============================================================================
