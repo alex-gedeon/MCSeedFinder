@@ -1,6 +1,7 @@
-import os, sys, click
+import os, sys, click, subprocess
 import multiprocessing as mp
 from PIL import Image
+
 
 # step 1: generate seeds
 
@@ -11,16 +12,17 @@ from PIL import Image
 @click.command()
 @click.argument('qx', type=int, required=True)
 @click.argument('qy', type=int, required=True)
-@click.option('--time', type=int, default=30, help='# seconds to run seed generator')
-def main(qx, qy, time):
+@click.argument('search_time', type=int, default=3)
+def main(qx, qy, search_time):
 
     # Create folder to store quad scan files
     if not os.path.exists('quad_scans/'):
         os.mkdir('quad_scans/')
     
     # Check if quadfile already exists
-    if not os.path.exists(f'quad_scans/quadseeds_{qx}x{qy}y.txt'):
-        open(f'quad_scans/quadseeds_{qx}x{qy}y.txt', 'x').close()
+    quadfile = f'quad_scans/quadseeds_{qx}x{qy}y.txt'
+    if not os.path.exists(quadfile):
+        open(quadfile, 'x').close()
         run_scan = True
     else:
         rerun = input("File already exists, rerun anyways? (y/n): ")
@@ -28,6 +30,26 @@ def main(qx, qy, time):
             rerun = input("File already exists, rerun anyways? (y/n): ")
         run_scan = True if rerun == 'y' else False
 
+    if run_scan:
+        # Run the scan on the quadfile
+        process = subprocess.Popen(['./find_quadhuts', str(qx), str(qy)], stdout=open(quadfile, 'w'))
+        try:
+            print(f'Generating quad hut seeds at {qx * 512}, {qy * 512} for {search_time} seconds...')
+            process.wait(timeout=search_time)
+            print('sdaf')
+        except subprocess.TimeoutExpired:
+            process.kill()
+
+        # Remove last line from file
+        with open(quadfile) as qf:
+            lines = qf.readlines()[:-1]
+            qf.close()
+        
+        with open(quadfile, 'w') as qf:
+            qf.writelines(lines)
+            qf.close()
+        print('Done!')
+        
 
 
 # step 2: filter seeds
