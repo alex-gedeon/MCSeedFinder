@@ -8,3 +8,8 @@ image_generator
 *.a
 quad_scans/*
 seed_bank/*
+env/*
+.vscode/*
+*.egg-info
+old/*
+*__pycache__/*
