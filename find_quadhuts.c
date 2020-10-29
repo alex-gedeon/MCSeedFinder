@@ -236,8 +236,12 @@ int main(int argc, char *argv[])
 
             printf("%" PRId64 "\n", seed);
             hits++;
+            // if(hits > 29) {  // stop after 30 
+            //     goto done;
+            // }
         }
     }
+    // done:;
 
     free(biomeCache);
 
