@@ -40,6 +40,7 @@ def filter_quadseeds(quadfile, outfile):
             # If at percentage point, print out
             if round(idx/len(seedlist) * 100) != last_perc:
                 print(f"\rProgress: {round(idx/len(seedlist) * 100)}%", end="")
+                last_perc = round(idx/len(seedlist) * 100)
             line = int(line.strip())
             os.system(f'./find_compactbiomes {int(line)} {int(line) + 1} >> {outfile}')
         print("\rProgress: 100%   ")
