@@ -36,7 +36,7 @@ def filter_quadseeds(quadfile, outfile):
         for line in seedlist:
             line = int(line.strip())
             os.system(
-                f'./find_compactbiomes {int(line)} {int(line) + 1} >> {outfile}')
+                f'./find_filtered_biomes {int(line)} {int(line) + 1} >> {outfile}')
 
     def search_seeds_reporter(seedlist):
         last_perc = -1
@@ -47,7 +47,7 @@ def filter_quadseeds(quadfile, outfile):
                 last_perc = round(idx/len(seedlist) * 100)
             line = int(line.strip())
             os.system(
-                f'./find_compactbiomes {int(line)} {int(line) + 1} >> {outfile}')
+                f'./find_filtered_biomes {int(line)} {int(line) + 1} >> {outfile}')
         print("\rProgress: 100%   ")
 
     # Determine number of processes and splits per process

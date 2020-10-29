@@ -2,8 +2,7 @@
 #include "generator.h"
 
 
-struct compactinfo_t
-{
+struct compactinfo_t {
     int64_t seedStart, seedEnd;
     unsigned int range;
     BiomeFilter filter;
@@ -12,12 +11,7 @@ struct compactinfo_t
 };
 
 
-#ifdef USE_PTHREAD
-static void *searchCompactBiomesThread(void *data)
-#else
-static DWORD WINAPI searchCompactBiomesThread(LPVOID data)
-#endif
-{
+static void *searchCompactBiomesThread(void *data) {
     struct compactinfo_t info = *(struct compactinfo_t *)data;
     int ax = -info.range, az = -info.range;
     int w = 2*info.range, h = 2*info.range;
@@ -28,21 +22,16 @@ static DWORD WINAPI searchCompactBiomesThread(LPVOID data)
     setupGenerator(&g, mcversion);
     int *cache = allocCache(&g.layers[L_VORONOI_ZOOM_1], w, h);
 
-    for (s = info.seedStart; s != info.seedEnd; s++)
-    {
+    for (s = info.seedStart; s != info.seedEnd; s++) {
         // if (!hasAllTemps(&g, s, 0, 0))
         //     continue;
 
-        if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, s, ax, az, w, h, info.filter, 1) > 0)
-        {
+        if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, s, ax, az, w, h, info.filter, 1) > 0) {
             int x, z;
-            if (info.withHut)
-            {
+            if (info.withHut) {
                 int r = info.range / SWAMP_HUT_CONFIG.regionSize;
-                for (z = -r; z < r; z++)
-                {
-                    for (x = -r; x < r; x++)
-                    {
+                for (z = -r; z < r; z++) {
+                    for (x = -r; x < r; x++) {
                         Pos p;
                         p = getStructurePos(SWAMP_HUT_CONFIG, s, x, z, NULL);
                         if (isViableStructurePos(Swamp_Hut, mcversion, &g, s, p.x, p.z))
@@ -52,13 +41,10 @@ static DWORD WINAPI searchCompactBiomesThread(LPVOID data)
                 continue;
                 L_hut_found:;
             }
-            if (info.withMonument)
-            {
+            if (info.withMonument) {
                 int r = info.range / MONUMENT_CONFIG.regionSize;
-                for (z = -r; z < r; z++)
-                {
-                    for (x = -r; x < r; x++)
-                    {
+                for (z = -r; z < r; z++) {
+                    for (x = -r; x < r; x++) {
                         Pos p;
                         p = getStructurePos(MONUMENT_CONFIG, s, x, z, NULL);
                         if (isViableStructurePos(Monument, mcversion, &g, s, p.x, p.z))
@@ -75,16 +61,11 @@ static DWORD WINAPI searchCompactBiomesThread(LPVOID data)
     }
 
     free(cache);
-
-#ifdef USE_PTHREAD
     pthread_exit(NULL);
-#endif
-    return 0;
 }
 
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     initBiomes();
 
     int64_t seedStart, seedEnd;
@@ -94,8 +75,7 @@ int main(int argc, char *argv[])
     int minscale;
 
     // arguments
-    if (argc <= 1)
-    {
+    if (argc <= 1) {
         printf( "find_compactbiomes [seed_start] [seed_end] [threads] [range]\n"
                 "\n"
                 "  seed_start    starting seed for search [long, default=0]\n"
@@ -125,8 +105,7 @@ int main(int argc, char *argv[])
 
     // store thread information
     uint64_t seedCnt = ((uint64_t)seedEnd - (uint64_t)seedStart) / threads;
-    for (t = 0; t < threads; t++)
-    {
+    for (t = 0; t < threads; t++) {
         info[t].seedStart = (int64_t)(seedStart + seedCnt * t);
         info[t].seedEnd = (int64_t)(seedStart + seedCnt * (t+1));
         info[t].range = range;
@@ -138,28 +117,11 @@ int main(int argc, char *argv[])
     info[threads-1].seedEnd = seedEnd;
 
     // start threads
-#ifdef USE_PTHREAD
-
-    for (t = 0; t < threads; t++)
-    {
+    for (t = 0; t < threads; ++t) {
         pthread_create(&threadID[t], NULL, searchCompactBiomesThread, (void*)&info[t]);
     }
 
-    for (t = 0; t < threads; t++)
-    {
+    for (t = 0; t < threads; ++t) {
         pthread_join(threadID[t], NULL);
     }
-
-#else
-
-    for (t = 0; t < threads; t++)
-    {
-        threadID[t] = CreateThread(NULL, 0, searchCompactBiomesThread, (LPVOID)&info[t], 0, NULL);
-    }
-
-    WaitForMultipleObjects(threads, threadID, TRUE, INFINITE);
-
-#endif
-
-    return 0;
 }
