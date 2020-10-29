@@ -14,7 +14,8 @@ endif
 
 .PHONY : all release debug libcubiomes clean
 
-all: release
+all: find_filtered_biomes find_quadhuts
+# all: release
 
 debug: CFLAGS += -DDEBUG -O0 -ggdb3
 debug: libcubiomes find_quadhuts find_compactbiomes image_generator
@@ -58,3 +59,8 @@ image_generator.o: image_generator.c util.h generator.h
 clean:
 	$(RM) *.o libcubiomes.a find_quadhuts find_compactbiomes image_generator
 
+find_filtered_biomes.o: find_filtered_biomes.c generator.h
+	$(CC) -c $(CFLAGS) $<
+
+find_filtered_biomes: find_filtered_biomes.o layers.o generator.o finders.o
+	$(CC) -o $@ $^ $(LDFLAGS)
