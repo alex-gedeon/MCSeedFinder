@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw
 import multiprocessing as mp
 import time
 
+
 def scan_quadseeds(qx, qy, search_time, quadfile):
     process = subprocess.Popen(
         ['./find_quadhuts', str(qx), str(qy)], stdout=open(quadfile, 'w'))
