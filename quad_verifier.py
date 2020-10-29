@@ -7,7 +7,7 @@ quads.sort()
 
 shutdown = False
 def search_seeds(queue, seedlist):
-    for index, line in enumerate(seedlist):
+    for _, line in enumerate(seedlist):
         if not queue.empty():
             break
         line = int(line.strip())

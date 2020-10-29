@@ -2,14 +2,14 @@ import os, sys, click, subprocess, time
 import multiprocessing as mp
 from PIL import Image, ImageDraw
 from shutil import rmtree
+import datetime as dt
 
 
 def scan_quadseeds(qx, qy, search_time, quadfile):
     process = subprocess.Popen(['./find_quadhuts', str(qx), str(qy)], stdout=open(quadfile, 'w'))
     try:
-        print(f'Generating quad hut seeds at {qx * 512}, {qy * 512} for {search_time} seconds...')
+        print(f'Generating quad witch hut seeds at ({qx * 512}, {qy * 512}) for {search_time} seconds...')
         process.wait(timeout=search_time)
-        print('sdaf')
     except subprocess.TimeoutExpired:
         process.kill()
 
@@ -21,7 +21,7 @@ def scan_quadseeds(qx, qy, search_time, quadfile):
     with open(quadfile, 'w') as qf:
         qf.writelines(lines)
         qf.close()
-    print(f'Generated {len(lines)} quad witch hut seeds!')
+    print(f'Found {len(lines)} quad witch hut seeds!')
 
 def filter_quadseeds(quadfile, outfile):
     # Open and sort quadfile
@@ -33,7 +33,16 @@ def filter_quadseeds(quadfile, outfile):
         for line in seedlist:
             line = int(line.strip())
             os.system(f'./find_compactbiomes {int(line)} {int(line) + 1} >> {outfile}')
-
+    
+    def search_seeds_reporter(seedlist):
+        last_perc = -1
+        for idx, line in enumerate(seedlist):
+            # If at percentage point, print out
+            if round(idx/len(seedlist) * 100) != last_perc:
+                print(f"\rProgress: {round(idx/len(seedlist) * 100)}%", end="")
+            line = int(line.strip())
+            os.system(f'./find_compactbiomes {int(line)} {int(line) + 1} >> {outfile}')
+        print("\rProgress: 100%   ")
 
     # Determine number of processes and splits per process
     num_processes = mp.cpu_count()
@@ -44,7 +53,7 @@ def filter_quadseeds(quadfile, outfile):
     for idx in range(num_processes):
         # If last index, give rest
         if idx == num_processes - 1:
-            a = mp.Process(target=search_seeds, args=[quads[idx*even_split:]])
+            a = mp.Process(target=search_seeds_reporter, args=[quads[idx*even_split:]])
         else:
             a = mp.Process(target=search_seeds, args=[quads[idx*even_split:idx*even_split + even_split]])
         a.start()
@@ -53,9 +62,10 @@ def filter_quadseeds(quadfile, outfile):
     # Attempt to join processes
     for process in processpool:
         process.join()
+    
+    num_found = len(open(outfile).readlines())
 
-    print(f"Searched {even_split * num_processes} seeds!")
-    return outfile
+    print(f"Searched {len(quads)} seeds, found {num_found} matches!")
 
 def convert_all_ppm_to_png(seedlist, folder, xsize=512, ysize=256):
     """Create png image given seed and folder."""
@@ -108,7 +118,7 @@ def convert_all_ppm_to_png(seedlist, folder, xsize=512, ysize=256):
 @click.command()
 @click.argument('qx', type=int, required=True)
 @click.argument('qy', type=int, required=True)
-@click.argument('search_time', type=int, default=3)
+@click.argument('search_time', type=int, default=5)
 @click.option('--force', type=bool, default=False)
 def main(qx, qy, search_time, force):
 
@@ -148,7 +158,9 @@ def main(qx, qy, search_time, force):
         if os.path.exists(filtered_file):
             os.remove(filtered_file)
         print("\nFiltering seeds as per generator.h...")
+        currt = dt.datetime.now()
         filter_quadseeds(quadfile, filtered_file)
+        print(f"  ~{round((dt.datetime.now() - currt).total_seconds(), 4)} seconds")
 
     ########### Step 3: Create Images ###########
 
@@ -162,10 +174,12 @@ def main(qx, qy, search_time, force):
     
     with open(filtered_file) as flfile:
         lines = flfile.readlines()
-        print(f"\nConverting {len(lines)} filtered seeds to {img_path}")
+        currt = dt.datetime.now()
+        print(f"\nConverting {len(lines)} filtered seeds to .png images in {img_path}")
         convert_all_ppm_to_png(lines, img_path)
+        print(f"  ~{round((dt.datetime.now() - currt).total_seconds(), 4)} seconds")
     
-    print("Done!")
+    print("\nDone!")
 
 
 
