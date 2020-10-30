@@ -83,10 +83,6 @@ int main(int argc, char *argv[]) {
         );
         exit(1);
     }
-    // if (argc <= 1 || sscanf(argv[1], "%" PRId64, &seedStart) != 1) seedStart = 0;
-    // if (argc <= 2 || sscanf(argv[2], "%" PRId64, &seedEnd) != 1) seedEnd = -1;
-    // if (argc <= 3 || sscanf(argv[3], "%u", &threads) != 1) threads = 1;
-    // if (argc <= 4 || sscanf(argv[4], "%u", &range) != 1) range = 1024;
 
     // Read in #threads and range
     int threads1 = atoi(argv[1]);
@@ -103,13 +99,6 @@ int main(int argc, char *argv[]) {
         sscanf(argv[i], "%" PRId64, &biome_filter[i-4]);
     }
 
-    printf("%d\n", threads1);
-    printf("%d\n", range1);
-    printf("%s\n", filepath);
-
-    for(int i = 0; i < num_biomes; ++i) {
-        printf("%" PRId64 "\n", biome_filter[i]);
-    }
     free(biome_filter);
     free(filepath);
     exit(1);
