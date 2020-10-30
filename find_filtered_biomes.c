@@ -66,6 +66,54 @@ static void *searchCompactBiomesThread(void *data) {
 
 
 int main(int argc, char *argv[]) {
+    // argv[0] = program name
+    // argv[1] = #threads
+    // argv[2] = range
+    // argv[3] = filepath
+    // argv[4:] = filter
+
+    // arguments
+    if (argc <= 4) {
+        printf( "find_compactbiomes [seed_start] [seed_end] [threads] [range]\n"
+                "\n"
+                "  threads       number of threads to use [uint, default=1]\n"
+                "  range         search range (in blocks) [uint, default=1024]\n"
+                "  filepath      path to main file\n"
+                "  filter        space separated list of biome ids\n"
+        );
+        exit(1);
+    }
+    // if (argc <= 1 || sscanf(argv[1], "%" PRId64, &seedStart) != 1) seedStart = 0;
+    // if (argc <= 2 || sscanf(argv[2], "%" PRId64, &seedEnd) != 1) seedEnd = -1;
+    // if (argc <= 3 || sscanf(argv[3], "%u", &threads) != 1) threads = 1;
+    // if (argc <= 4 || sscanf(argv[4], "%u", &range) != 1) range = 1024;
+
+    // Read in #threads and range
+    int threads1 = atoi(argv[1]);
+    int range1 = atoi(argv[2]);
+
+    // Read in filepath
+    char * filepath = (char *) malloc(strlen(argv[3]));
+    strcpy(filepath, argv[3]);
+
+    // Read in filter
+    int num_biomes = argc - 4;
+    int64_t * biome_filter = (int64_t *) malloc(sizeof(int64_t) * (num_biomes));
+    for(int i = 4; i < argc; ++i) {
+        sscanf(argv[i], "%" PRId64, &biome_filter[i-4]);
+    }
+
+    printf("%d\n", threads1);
+    printf("%d\n", range1);
+    printf("%s\n", filepath);
+
+    for(int i = 0; i < num_biomes; ++i) {
+        printf("%" PRId64 "\n", biome_filter[i]);
+    }
+    free(biome_filter);
+    free(filepath);
+    exit(1);
+
     initBiomes();
 
     int64_t seedStart, seedEnd;
@@ -74,20 +122,6 @@ int main(int argc, char *argv[]) {
     int withHut, withMonument;
     int minscale;
 
-    // arguments
-    if (argc <= 1) {
-        printf( "find_compactbiomes [seed_start] [seed_end] [threads] [range]\n"
-                "\n"
-                "  seed_start    starting seed for search [long, default=0]\n"
-                "  end_start     end seed for search [long, default=-1]\n"
-                "  threads       number of threads to use [uint, default=1]\n"
-                "  range         search range (in blocks) [uint, default=1024]\n");
-        exit(1);
-    }
-    if (argc <= 1 || sscanf(argv[1], "%" PRId64, &seedStart) != 1) seedStart = 0;
-    if (argc <= 2 || sscanf(argv[2], "%" PRId64, &seedEnd) != 1) seedEnd = -1;
-    if (argc <= 3 || sscanf(argv[3], "%u", &threads) != 1) threads = 1;
-    if (argc <= 4 || sscanf(argv[4], "%u", &range) != 1) range = 1024;
 
     // TODO: set up a customisable biome filter
     filter = setupBiomeFilter(XAND_BIOMES,
