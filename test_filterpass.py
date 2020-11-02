@@ -1,7 +1,7 @@
 import util as ut
 import os
 
-filter = ["wooded_mountains", "ice_spikes", "plains"]
+filter = ["wooded_mountains"]#, "ice_spikes"]#, "plains"]#, "shattered_savanna"]
 idict = ut.get_lookup_table()
 enum_ints = [str(idict[key]) for key in filter]
 

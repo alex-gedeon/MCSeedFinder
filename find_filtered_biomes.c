@@ -2,8 +2,6 @@
 #include "generator.h"
 #include <stdio.h>
 
-int read_file_line(FILE *inFilePtr, char *seed);
-
 
 struct compactinfo_t {
     int64_t seedStart, seedEnd;
@@ -16,59 +14,9 @@ struct compactinfo_t {
 
 #define MAXLINELENGTH 64
 
-static void *searchCompactBiomesThread(void *data) {
-    struct compactinfo_t info = *(struct compactinfo_t *)data;
-    int ax = -info.range, az = -info.range;
-    int w = 2*info.range, h = 2*info.range;
+int read_file_line(FILE *inFilePtr, char *seed);
+static void *searchCompactBiomesThread(void *data);
 
-    int mcversion = MC_1_14;
-    LayerStack g;
-    setupGenerator(&g, mcversion);
-    int *cache = allocCache(&g.layers[L_VORONOI_ZOOM_1], w, h);
-
-    // Open seed file for reading
-    char seed[MAXLINELENGTH];
-    FILE *inFilePtr = fopen(info.filepath, "r");
-    if(inFilePtr == NULL) {
-        printf("error in opening %s\n", info.filepath);
-    }    
-
-    // Read in one seed at a time
-    int hits = 0;
-    while (read_file_line(inFilePtr, seed)) {
-        int64_t curr_seed;
-        sscanf(seed, "%" PRId64, &curr_seed);
-
-        if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, curr_seed, ax, az, w, h, info.filter, 1) > 0) {
-            hits++;
-            // printf("%" PRId64 "\n", curr_seed);
-            fflush(stdout);
-        }
-    }
-    printf("%d\n", hits);
-    free(cache);
-    pthread_exit(NULL);
-
-}
-
-int read_file_line(FILE *inFilePtr, char *seed) {
-    // Allocate buffer, clear old value
-    seed[0] = '\0';
-
-    // Read in a line
-    if(fgets(seed, MAXLINELENGTH, inFilePtr) == NULL) {
-        return 0; // If reached the end
-    }
-
-    // Check for a line being too long
-    if(strchr(seed, '\n') == NULL) {
-        // Line too long
-        printf("error: line too long\n");
-        exit(1);
-    }
-
-    return 1;
-}
 
 int main(int argc, char *argv[]) {
     // argv[0] = program name
@@ -134,4 +82,60 @@ int main(int argc, char *argv[]) {
     }
     free(biome_filter);
     free(filepath);
+}
+
+static void *searchCompactBiomesThread(void *data) {
+    struct compactinfo_t info = *(struct compactinfo_t *)data;
+    int ax = -info.range, az = -info.range;
+    int w = 2*info.range, h = 2*info.range;
+
+    int mcversion = MC_1_14;
+    LayerStack g;
+    setupGenerator(&g, mcversion);
+    int *cache = allocCache(&g.layers[L_VORONOI_ZOOM_1], w, h);
+
+    // Open seed file for reading
+    char seed[MAXLINELENGTH];
+    FILE *inFilePtr = fopen(info.filepath, "r");
+    if(inFilePtr == NULL) {
+        printf("error in opening %s\n", info.filepath);
+    }    
+
+    // Read in one seed at a time
+    int count = 0;
+    int hits = 0;
+    while (read_file_line(inFilePtr, seed)) {
+        int64_t curr_seed;
+        sscanf(seed, "%" PRId64, &curr_seed);
+
+        if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, curr_seed, ax, az, w, h, info.filter, 1) > 0) {
+            // printf("%" PRId64 "\n", curr_seed);
+            // fflush(stdout);
+            hits++;
+        }
+        count++;
+    }
+    printf("found %d matches from %d seeds\n", hits, count);
+    free(cache);
+    pthread_exit(NULL);
+
+}
+
+int read_file_line(FILE *inFilePtr, char *seed) {
+    // Allocate buffer, clear old value
+    seed[0] = '\0';
+
+    // Read in a line
+    if(fgets(seed, MAXLINELENGTH, inFilePtr) == NULL) {
+        return 0; // If reached the end
+    }
+
+    // Check for a line being too long
+    if(strchr(seed, '\n') == NULL) {
+        // Line too long
+        printf("error: line too long\n");
+        exit(1);
+    }
+
+    return 1;
 }
