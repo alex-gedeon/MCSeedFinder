@@ -17,26 +17,26 @@ static void *searchCompactBiomesThread(void *data) {
     struct compactinfo_t info = *(struct compactinfo_t *)data;
     int ax = -info.range, az = -info.range;
     int w = 2*info.range, h = 2*info.range;
-    int64_t s;
+    int64_t curr_seed;
 
     int mcversion = MC_1_14;
     LayerStack g;
     setupGenerator(&g, mcversion);
     int *cache = allocCache(&g.layers[L_VORONOI_ZOOM_1], w, h);
 
-    for (s = info.seedStart; s != info.seedEnd; s++) {
+    for (curr_seed = info.seedStart; curr_seed != info.seedEnd; curr_seed++) {
         // if (!hasAllTemps(&g, s, 0, 0))
         //     continue;
 
-        if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, s, ax, az, w, h, info.filter, 1) > 0) {
+        if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, curr_seed, ax, az, w, h, info.filter, 1) > 0) {
             int x, z;
             if (info.withHut) {
                 int r = info.range / SWAMP_HUT_CONFIG.regionSize;
                 for (z = -r; z < r; z++) {
                     for (x = -r; x < r; x++) {
                         Pos p;
-                        p = getStructurePos(SWAMP_HUT_CONFIG, s, x, z, NULL);
-                        if (isViableStructurePos(Swamp_Hut, mcversion, &g, s, p.x, p.z))
+                        p = getStructurePos(SWAMP_HUT_CONFIG, curr_seed, x, z, NULL);
+                        if (isViableStructurePos(Swamp_Hut, mcversion, &g, curr_seed, p.x, p.z))
                             goto L_hut_found;
                     }
                 }
@@ -48,8 +48,8 @@ static void *searchCompactBiomesThread(void *data) {
                 for (z = -r; z < r; z++) {
                     for (x = -r; x < r; x++) {
                         Pos p;
-                        p = getStructurePos(MONUMENT_CONFIG, s, x, z, NULL);
-                        if (isViableStructurePos(Monument, mcversion, &g, s, p.x, p.z))
+                        p = getStructurePos(MONUMENT_CONFIG, curr_seed, x, z, NULL);
+                        if (isViableStructurePos(Monument, mcversion, &g, curr_seed, p.x, p.z))
                             goto L_monument_found;
                     }
                 }
@@ -57,7 +57,7 @@ static void *searchCompactBiomesThread(void *data) {
                 L_monument_found:;
             }
 
-            printf("%" PRId64 "\n", s);
+            printf("%" PRId64 "\n", curr_seed);
             fflush(stdout);
         }
     }
@@ -83,9 +83,9 @@ int read_file_line(FILE *inFilePtr, char *seed) {
     }
 
     // Print line
-    int64_t temp;
-    sscanf(seed, "%" PRId64, &temp);
-    printf("%" PRId64 "\n", temp);
+    // int64_t temp;
+    // sscanf(seed, "%" PRId64, &temp);
+    // printf("%" PRId64 "\n", temp);
 
     // printf("%s", seed);
     return 1;
@@ -122,9 +122,9 @@ int main(int argc, char *argv[]) {
 
     // Read in filter
     int num_biomes = argc - 4;
-    int64_t * biome_filter = (int64_t *) malloc(sizeof(int64_t) * (num_biomes));
+    int * biome_filter = (int *) malloc(sizeof(int) * (num_biomes));
     for(int i = 4; i < argc; ++i) {
-        sscanf(argv[i], "%" PRId64, &biome_filter[i-4]);
+        biome_filter[i-4] = atoi(argv[i]);
     }
 
     char seed[MAXLINELENGTH];
@@ -133,23 +133,14 @@ int main(int argc, char *argv[]) {
         printf("error in opening %s\n", filepath);
     }
 
-    int count = 0;
     while(read_file_line(inFilePtr, seed)) {
-        ++count;
+        int64_t temp;
+        sscanf(seed, "%" PRId64, &temp);
     }
-    printf("%d\n", count);
 
-    // printf("%d %d\n", threads1, range1);
-    // printf("%s\n", filepath);
+    
 
-    // for(int i = 0; i < num_biomes; ++i) {
-    //     printf("%" PRId64 " ", biome_filter[i]);
-    // }
-    // printf("\n");
 
-    free(biome_filter);
-    free(filepath);
-    exit(1);
 
     initBiomes();
 
@@ -159,6 +150,9 @@ int main(int argc, char *argv[]) {
     int withHut, withMonument;
     int minscale;
 
+    free(biome_filter);
+    free(filepath);
+    exit(1);
 
     // TODO: set up a customisable biome filter
     filter = setupBiomeFilter(XAND_BIOMES,
