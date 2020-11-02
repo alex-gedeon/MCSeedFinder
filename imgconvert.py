@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw
 import os, time
 
 Image.MAX_IMAGE_PIXELS = None
-def convert_ppm_to_png(seed, folder, xsize=16384, ysize=8192):
+def convert_ppm_to_png(seed, folder, xsize=256, ysize=256):
     """Create png image given seed and folder."""
 
     # Create folder, make sure it exists

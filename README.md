@@ -26,9 +26,9 @@ Filter for seeds with quad witch huts and certain biomes efficiently.
     - idea 1: import .h file with filter than python code writes to and recompile
     - idea 2: pass in filter to c program, figure out how to parse to const int array of enum values
     - idea 2 is much harder, but much much better than idea 1. will try first
-  - quadfinder
-    - idea 1: have a softer shutdown by having a thread checking for communication with python
-    - idea 2: loop for as many seeds as specified
-    - yeah idea 2 is a lot easier and better
+- quadfinder
+  - idea 1: have a softer shutdown by having a thread checking for communication with python
+  - idea 2: loop for as many seeds as specified
+  - yeah idea 2 is a lot easier and better
 - expand seedbank
   - should never be able to delete files, institute policty of 10m seeds minimum

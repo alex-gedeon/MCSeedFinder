@@ -1,5 +1,6 @@
 #include "finders.h"
 #include "generator.h"
+#include <stdio.h>
 
 
 struct compactinfo_t {
@@ -10,6 +11,7 @@ struct compactinfo_t {
     int minscale;
 };
 
+#define MAXLINELENGTH 64
 
 static void *searchCompactBiomesThread(void *data) {
     struct compactinfo_t info = *(struct compactinfo_t *)data;
@@ -64,6 +66,30 @@ static void *searchCompactBiomesThread(void *data) {
     pthread_exit(NULL);
 }
 
+int read_file_line(FILE *inFilePtr, char *seed) {
+    // Allocate buffer, clear old value
+    seed[0] = '\0';
+
+    // Read in a line
+    if(fgets(seed, MAXLINELENGTH, inFilePtr) == NULL) {
+        return 0; // If reached the end
+    }
+
+    // Check for a line being too long
+    if(strchr(seed, '\n') == NULL) {
+        // Line too long
+        printf("error: line too long\n");
+        exit(1);
+    }
+
+    // Print line
+    int64_t temp;
+    sscanf(seed, "%" PRId64, &temp);
+    printf("%" PRId64 "\n", temp);
+
+    // printf("%s", seed);
+    return 1;
+}
 
 int main(int argc, char *argv[]) {
     // argv[0] = program name
@@ -88,9 +114,11 @@ int main(int argc, char *argv[]) {
     int threads1 = atoi(argv[1]);
     int range1 = atoi(argv[2]);
 
-    // Read in filepath
+    // Read in filepath, remove .txt
     char * filepath = (char *) malloc(strlen(argv[3]));
     strcpy(filepath, argv[3]);
+    // filepath[strlen(filepath) - 4] = '\0';
+    // printf("%s\n", filepath);
 
     // Read in filter
     int num_biomes = argc - 4;
@@ -98,6 +126,26 @@ int main(int argc, char *argv[]) {
     for(int i = 4; i < argc; ++i) {
         sscanf(argv[i], "%" PRId64, &biome_filter[i-4]);
     }
+
+    char seed[MAXLINELENGTH];
+    FILE *inFilePtr = fopen(filepath, "r");
+    if(inFilePtr == NULL) {
+        printf("error in opening %s\n", filepath);
+    }
+
+    int count = 0;
+    while(read_file_line(inFilePtr, seed)) {
+        ++count;
+    }
+    printf("%d\n", count);
+
+    // printf("%d %d\n", threads1, range1);
+    // printf("%s\n", filepath);
+
+    // for(int i = 0; i < num_biomes; ++i) {
+    //     printf("%" PRId64 " ", biome_filter[i]);
+    // }
+    // printf("\n");
 
     free(biome_filter);
     free(filepath);
