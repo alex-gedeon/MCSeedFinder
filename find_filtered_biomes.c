@@ -132,7 +132,9 @@ static void *searchCompactBiomesThread(void *data) {
     printf("%s\n", outfilepath);
     for(int i = 0; i < MAXFILEPATHLENGTH; ++i) {
         if(outfilepath[i] == ".") {
-            //
+            outfilepath[i + 1] = '\0';
+            strcat(outfilepath, "_filtered.txt");
+            break;
         }
     }
     pthread_exit(NULL);
