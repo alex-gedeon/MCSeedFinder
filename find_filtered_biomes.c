@@ -91,10 +91,10 @@ int main(int argc, char *argv[]) {
         strcat(dest_filepath, buffer);
         
         // Add filepath to struct, will be freed inside thread function
-        info[t].filepath = filepath;
+        info[t].filepath = dest_filepath;
 
     }
-    exit(1);
+    // exit(1);
 
     // start threads
     for (unsigned int t = 0; t < num_threads; ++t) {
@@ -125,6 +125,17 @@ static void *searchCompactBiomesThread(void *data) {
         printf("error in opening %s\n", info.filepath);
         exit(1);
     }
+
+    char outfilepath[MAXFILEPATHLENGTH];
+    strcpy(outfilepath, info.filepath);
+
+    printf("%s\n", outfilepath);
+    for(int i = 0; i < MAXFILEPATHLENGTH; ++i) {
+        if(outfilepath[i] == ".") {
+            //
+        }
+    }
+    pthread_exit(NULL);
 
     FILE *outFileptr = fopen("extra/10k_8x0y_filtered.txt", "w");
     if(outFileptr == NULL) {

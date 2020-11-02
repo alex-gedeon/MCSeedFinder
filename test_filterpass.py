@@ -29,7 +29,7 @@ def make_splits():
         with open(TMP_DIR + SEARCH_COORDS + "_split" + str(idx) + ".txt", 'w') as outfile:
             outfile.writelines(split)
     
-make_splits()
+# make_splits()
 
 # Set up filter
 filter = ["jungle", "shattered_savanna", "ice_spikes"]#, "badlands"]
@@ -37,4 +37,4 @@ idict = ut.get_lookup_table()
 enum_ints = sorted([idict[key] for key in filter])
 enum_ints = [str(val) for val in enum_ints]
 
-os.system(f'./find_filtered_biomes {cpu_count()} 1024 {MASTER_FILE} {" ".join(enum_ints)}')
+os.system(f'./find_filtered_biomes {cpu_count()} 1024 {TMP_DIR + SEARCH_COORDS + ".txt"} {" ".join(enum_ints)}')
