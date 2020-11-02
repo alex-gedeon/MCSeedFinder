@@ -13,6 +13,7 @@ struct compactinfo_t {
 };
 
 #define MAXLINELENGTH 64
+#define MAXFILEPATHLENGTH 100
 
 int read_file_line(FILE *inFilePtr, char *seed);
 static void *searchCompactBiomesThread(void *data);
@@ -49,9 +50,10 @@ int main(int argc, char *argv[]) {
     unsigned int search_range = atoi(argv[RANGEIDX]);
 
     // Read in filepath, remove .txt
-    char * filepath = (char *) malloc(strlen(argv[FILEPATHIDX]));
+    char * filepath = (char *) malloc(MAXFILEPATHLENGTH);
     strcpy(filepath, argv[FILEPATHIDX]);
-    // filepath[strlen(filepath) - 4] = '\0';
+    filepath[strlen(argv[FILEPATHIDX]) - 4] = '\0';
+    strcat(filepath, "_split");
 
     // Read in filter
     int num_biomes = argc - NUMPARAMS;
@@ -71,14 +73,28 @@ int main(int argc, char *argv[]) {
     thread_id_t threadID[num_threads];
     struct compactinfo_t info[num_threads];
 
-
     // store thread information
     for (unsigned int t = 0; t < num_threads; t++) {
         info[t].range = search_range;
         info[t].filter = filter;
         info[t].minscale = minscale;
+
+        // Make new filepath object
+        char * dest_filepath = (char *) malloc(MAXFILEPATHLENGTH);
+        strcpy(dest_filepath, filepath);
+
+        // Add value of t to buffer and filepath extension
+        char buffer[20];
+        sprintf(buffer, "%d.txt", t);
+
+        // Add buffer to dest path
+        strcat(dest_filepath, buffer);
+        
+        // Add filepath to struct, will be freed inside thread function
         info[t].filepath = filepath;
+
     }
+    exit(1);
 
     // start threads
     for (unsigned int t = 0; t < num_threads; ++t) {
@@ -116,14 +132,22 @@ static void *searchCompactBiomesThread(void *data) {
         exit(1);
     }
 
+    // Find number of lines in file
+    char buf[MAXLINELENGTH];
+    int num_lines = 0;
+    while(fgets(buf, MAXLINELENGTH, inFilePtr) != NULL) {
+        num_lines++;
+    }
+    rewind(inFilePtr);
+
     // Read in one seed at a time
     int count = 0;
     int last_perc = -1;
     int hits = 0;
     int64_t curr_seed;
     while (read_file_line(inFilePtr, seed)) {
-        if((int)((double)count/10000 * 100) > last_perc) {
-            last_perc = (int)((double)count/10000 * 100);
+        if((int)((double)count/num_lines * 100) > last_perc) {
+            last_perc = (int)((double)count/num_lines * 100);
             printf("\rProgress: %d%%", last_perc);
             fflush(stdout);
         }
@@ -140,6 +164,7 @@ static void *searchCompactBiomesThread(void *data) {
     }
     printf("\nfound %d matches from %d seeds\n", hits, count);
     free(cache);
+    free(info.filepath);
     pthread_exit(NULL);
 
 }
