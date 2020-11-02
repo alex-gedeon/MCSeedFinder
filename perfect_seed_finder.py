@@ -6,12 +6,15 @@ import datetime as dt
 
 import util as ut
 
+# def parse_run_scan(force, delete_if_run=False):
+#     pass
+
 
 @click.command()
 @click.argument('qx', type=int, required=True)
 @click.argument('qy', type=int, required=True)
 @click.argument('search_time', type=int, default=5)
-@click.option('--force', type=bool, default=False)
+@click.option('--force', type=str, default="default")
 def main(qx, qy, search_time, force):
 
     ########### Step 1: Generate Seeds ###########
@@ -24,12 +27,15 @@ def main(qx, qy, search_time, force):
     quadfile = f'quad_scans/quadseeds_{qx}x{qy}y.txt'
     run_scan = True
     if not os.path.exists(quadfile):
-        open(quadfile, 'x').close()
-    elif not force:
-        rerun = input("Quadfile already exists, rerun anyways? (y/n): ")
-        while rerun not in ['y', 'n']:
+            open(quadfile, 'x').close()
+    else:
+        if force == "default":
             rerun = input("Quadfile already exists, rerun anyways? (y/n): ")
-        run_scan = True if rerun == 'y' else False
+            while rerun not in ['y', 'n']:
+                rerun = input("Quadfile already exists, rerun anyways? (y/n): ")
+            run_scan = True if rerun == 'y' else False
+        else:
+            run_scan = False
 
     # Run the scan on the quadfile if necessary
     if run_scan:
@@ -42,16 +48,16 @@ def main(qx, qy, search_time, force):
 
     # Remove existing filtered file if exists
     run_scan = True
-    if os.path.exists(filtered_file) and not force:
-        rerun = input("Filter quadfile already exists, rerun anyways? (y/n): ")
-        while rerun not in ['y', 'n']:
-            rerun = input(
-                "Filter quadfile already exists, rerun anyways? (y/n): ")
-        run_scan = True if rerun == 'y' else False
+    if os.path.exists(filtered_file):
+        if force == "default":
+            rerun = input("Filter quadfile already exists, rerun anyways? (y/n): ")
+            while rerun not in ['y', 'n']:
+                rerun = input(
+                    "Filter quadfile already exists, rerun anyways? (y/n): ")
+            run_scan = True if rerun == 'y' else False
+        else:
+            run_scan = False
     if run_scan:
-        if os.path.exists(filtered_file):
-            os.remove(filtered_file)
-        print("\nFiltering seeds as per generator.h...")
         currt = dt.datetime.now()
         ut.filter_quadseeds(quadfile, filtered_file)
         print(f"  ~{round((dt.datetime.now() - currt).total_seconds(), 4)} seconds")

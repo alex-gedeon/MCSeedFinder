@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     // Extract the desired layer.
     Layer *layer = &g.layers[L_SHORE_16];
 
-    unsigned int scale = 4;
+    unsigned int scale = 1;
     unsigned int imgWidth = areaWidth*scale, imgHeight = areaHeight*scale;
 
     // Allocate a sufficient buffer for the biomes and for the image pixels.

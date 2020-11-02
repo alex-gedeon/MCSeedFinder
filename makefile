@@ -14,7 +14,7 @@ endif
 
 .PHONY : all release debug libcubiomes clean
 
-all: find_filtered_biomes find_quadhuts
+all: find_filtered_biomes find_quadhuts find_compactbiomes image_generator
 # all: release
 
 debug: CFLAGS += -DDEBUG -O0 -ggdb3

@@ -27,6 +27,9 @@ def scan_quadseeds(qx, qy, search_time, quadfile):
 
 
 def filter_quadseeds(quadfile, outfile):
+    if os.path.exists(outfile):
+            os.remove(outfile)
+    print("\nFiltering seeds as per generator.h...")
     # Open and sort quadfile
     quads = open(quadfile).readlines()
     quads.sort()
@@ -36,18 +39,18 @@ def filter_quadseeds(quadfile, outfile):
         for line in seedlist:
             line = int(line.strip())
             os.system(
-                f'./find_filtered_biomes {int(line)} {int(line) + 1} >> {outfile}')
+                f'./find_compactbiomes {int(line)} {int(line) + 1} >> {outfile}')
 
     def search_seeds_reporter(seedlist):
         last_perc = -1
         for idx, line in enumerate(seedlist):
             # If at percentage point, print out
-            if round(idx/len(seedlist) * 100) != last_perc:
+            if round(idx/len(seedlist) * 100) > last_perc:
                 print(f"\rProgress: {round(idx/len(seedlist) * 100)}%", end="")
                 last_perc = round(idx/len(seedlist) * 100)
             line = int(line.strip())
             os.system(
-                f'./find_filtered_biomes {int(line)} {int(line) + 1} >> {outfile}')
+                f'./find_compactbiomes {int(line)} {int(line) + 1} >> {outfile}')
         print("\rProgress: 100%   ")
 
     # Determine number of processes and splits per process
@@ -76,7 +79,7 @@ def filter_quadseeds(quadfile, outfile):
     print(f"Searched {len(quads)} seeds, found {num_found} matches!")
 
 
-def convert_all_ppm_to_png(seedlist, folder, xsize=512, ysize=256):
+def convert_all_ppm_to_png(seedlist, folder, xsize=256, ysize=256):
     """Create png image given seed and folder."""
 
     # Create folder, make sure it exists
