@@ -24,6 +24,10 @@ int main(int argc, char *argv[]) {
     // argv[2] = range
     // argv[3] = filepath
     // argv[4:] = filter
+    int THREADIDX = 1;
+    int RANGEIDX = 2;
+    int FILEPATHIDX = 3;
+    int NUMPARAMS = 4;
 
     // arguments
     if (argc <= 4) {
@@ -38,19 +42,19 @@ int main(int argc, char *argv[]) {
     }
 
     // Read in #threads and range
-    unsigned int num_threads = atoi(argv[1]);
-    unsigned int search_range = atoi(argv[2]);
+    unsigned int num_threads = atoi(argv[THREADIDX]);
+    unsigned int search_range = atoi(argv[RANGEIDX]);
 
     // Read in filepath, remove .txt
-    char * filepath = (char *) malloc(strlen(argv[3]));
-    strcpy(filepath, argv[3]);
+    char * filepath = (char *) malloc(strlen(argv[FILEPATHIDX]));
+    strcpy(filepath, argv[FILEPATHIDX]);
     // filepath[strlen(filepath) - 4] = '\0';
 
     // Read in filter
-    int num_biomes = argc - 4;
+    int num_biomes = argc - NUMPARAMS;
     int * biome_filter = (int *) malloc(sizeof(int) * (num_biomes));
-    for(int i = 4; i < argc; ++i) {
-        biome_filter[i-4] = atoi(argv[i]);
+    for(int i = NUMPARAMS; i < argc; ++i) {
+        biome_filter[i-NUMPARAMS] = atoi(argv[i]);
     }
 
     initBiomes();
@@ -99,23 +103,38 @@ static void *searchCompactBiomesThread(void *data) {
     FILE *inFilePtr = fopen(info.filepath, "r");
     if(inFilePtr == NULL) {
         printf("error in opening %s\n", info.filepath);
-    }    
+        exit(1);
+    }
+
+    FILE *outFileptr = fopen("extra/1m_8x0y_filtered.txt", "w");
+    if(outFileptr == NULL) {
+        printf("error in opening outfile");
+        exit(1);
+    }
 
     // Read in one seed at a time
     int count = 0;
+    int last_perc = -1;
     int hits = 0;
     while (read_file_line(inFilePtr, seed)) {
+        if((int)((double)count/1000000 * 100) > last_perc) {
+            last_perc = (int)((double)count/1000000 * 100);
+            printf("\rProgress: %d%%", last_perc);
+            fflush(stdout);
+        }
+
         int64_t curr_seed;
         sscanf(seed, "%" PRId64, &curr_seed);
 
         if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, curr_seed, ax, az, w, h, info.filter, 1) > 0) {
             // printf("%" PRId64 "\n", curr_seed);
             // fflush(stdout);
+            fprintf(outFileptr, "%" PRId64 "\n", curr_seed);
             hits++;
         }
         count++;
     }
-    printf("found %d matches from %d seeds\n", hits, count);
+    printf("\nfound %d matches from %d seeds\n", hits, count);
     free(cache);
     pthread_exit(NULL);
 
