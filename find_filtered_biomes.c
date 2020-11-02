@@ -41,7 +41,7 @@ static void *searchCompactBiomesThread(void *data) {
 
         if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, curr_seed, ax, az, w, h, info.filter, 1) > 0) {
             hits++;
-            printf("%" PRId64 "\n", curr_seed);
+            // printf("%" PRId64 "\n", curr_seed);
             fflush(stdout);
         }
     }
@@ -67,12 +67,6 @@ int read_file_line(FILE *inFilePtr, char *seed) {
         exit(1);
     }
 
-    // Print line
-    // int64_t temp;
-    // sscanf(seed, "%" PRId64, &temp);
-    // printf("%" PRId64 "\n", temp);
-
-    // printf("%s", seed);
     return 1;
 }
 
@@ -111,48 +105,24 @@ int main(int argc, char *argv[]) {
         biome_filter[i-4] = atoi(argv[i]);
     }
 
-    
-
-
-
     initBiomes();
 
-    // int64_t seedStart, seedEnd;
-    // unsigned int range;
+    // Set up filtering variables
     BiomeFilter filter;
-    // int withHut, withMonument;
     int minscale;
-
-
-    // TODO: set up a customisable biome filter
-    filter = setupBiomeFilter(XAND_BIOMES,
-                sizeof(XAND_BIOMES)/sizeof(int));
+    filter = setupBiomeFilter(biome_filter, num_biomes);
     minscale = 1; // terminate search at this layer scale
-    // TODO: simple structure filter
-    // withHut = 0;
-    // withMonument = 0;
-
-    // printf("Starting search through seeds %" PRId64 " to %" PRId64", using %u threads.\n"
-    //        "Search radius = %u.\n", seedStart, seedEnd, threads, range);
-
     thread_id_t threadID[num_threads];
     struct compactinfo_t info[num_threads];
 
-    // dont need to store start and end anymore
 
     // store thread information
-    // uint64_t seedCnt = ((uint64_t)seedEnd - (uint64_t)seedStart) / num_threads;
     for (unsigned int t = 0; t < num_threads; t++) {
-        // info[t].seedStart = (int64_t)(seedStart + seedCnt * t);
-        // info[t].seedEnd = (int64_t)(seedStart + seedCnt * (t+1));
         info[t].range = search_range;
         info[t].filter = filter;
-        // info[t].withHut = withHut;
-        // info[t].withMonument = withMonument;
         info[t].minscale = minscale;
         info[t].filepath = filepath;
     }
-    // info[num_threads-1].seedEnd = seedEnd;
 
     // start threads
     for (unsigned int t = 0; t < num_threads; ++t) {
@@ -164,5 +134,4 @@ int main(int argc, char *argv[]) {
     }
     free(biome_filter);
     free(filepath);
-    exit(1);
 }

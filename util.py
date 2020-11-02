@@ -54,7 +54,7 @@ def filter_quadseeds(quadfile, outfile):
         print("\rProgress: 100%   ")
 
     # Determine number of processes and splits per process
-    num_processes = mp.cpu_count()
+    num_processes = 1#mp.cpu_count()
     even_split = len(quads) // num_processes
 
     processpool = []
