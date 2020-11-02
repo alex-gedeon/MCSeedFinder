@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Read in #threads and range
-    int threads1 = atoi(argv[1]);
+    int num_threads = atoi(argv[1]);
     int range1 = atoi(argv[2]);
 
     // Read in filepath, remove .txt
@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
     initBiomes();
 
     int64_t seedStart, seedEnd;
-    unsigned int threads, t, range;
+    unsigned int range;
     BiomeFilter filter;
     int withHut, withMonument;
     int minscale;
@@ -166,12 +166,12 @@ int main(int argc, char *argv[]) {
     // printf("Starting search through seeds %" PRId64 " to %" PRId64", using %u threads.\n"
     //        "Search radius = %u.\n", seedStart, seedEnd, threads, range);
 
-    thread_id_t threadID[threads];
-    struct compactinfo_t info[threads];
+    thread_id_t threadID[num_threads];
+    struct compactinfo_t info[num_threads];
 
     // store thread information
-    uint64_t seedCnt = ((uint64_t)seedEnd - (uint64_t)seedStart) / threads;
-    for (t = 0; t < threads; t++) {
+    uint64_t seedCnt = ((uint64_t)seedEnd - (uint64_t)seedStart) / num_threads;
+    for (int t = 0; t < num_threads; t++) {
         info[t].seedStart = (int64_t)(seedStart + seedCnt * t);
         info[t].seedEnd = (int64_t)(seedStart + seedCnt * (t+1));
         info[t].range = range;
@@ -180,14 +180,14 @@ int main(int argc, char *argv[]) {
         // info[t].withMonument = withMonument;
         info[t].minscale = minscale;
     }
-    info[threads-1].seedEnd = seedEnd;
+    info[num_threads-1].seedEnd = seedEnd;
 
     // start threads
-    for (t = 0; t < threads; ++t) {
+    for (int t = 0; t < num_threads; ++t) {
         pthread_create(&threadID[t], NULL, searchCompactBiomesThread, (void*)&info[t]);
     }
 
-    for (t = 0; t < threads; ++t) {
+    for (int t = 0; t < num_threads; ++t) {
         pthread_join(threadID[t], NULL);
     }
 }
