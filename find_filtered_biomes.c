@@ -28,8 +28,8 @@ int main(int argc, char *argv[]) {
     int THREADIDX = 1;
     int RANGEIDX = 2;
     int FILEPATHIDX = 3;
-    int FILESIZEIDX = 4;
-    int NUMPARAMS = 5;
+    // int FILESIZEIDX = 4;
+    int NUMPARAMS = 4;
 
     // arguments
     if (argc <= 4) {
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
                 "  threads       number of threads to use [uint, default=1]\n"
                 "  range         search range (in blocks) [uint, default=1024]\n"
                 "  filepath      path to main file\n"
-                "  file size     size of file to filter\n"
+                // "  file size     size of file to filter\n"
                 "  filter        space separated list of biome ids\n"
         );
         exit(1);
@@ -66,6 +66,7 @@ int main(int argc, char *argv[]) {
     BiomeFilter filter;
     int minscale;
     filter = setupBiomeFilter(biome_filter, num_biomes);
+
     minscale = 1; // terminate search at this layer scale
     thread_id_t threadID[num_threads];
     struct compactinfo_t info[num_threads];
@@ -109,7 +110,7 @@ static void *searchCompactBiomesThread(void *data) {
         exit(1);
     }
 
-    FILE *outFileptr = fopen("extra/1m_8x0y_filtered.txt", "w");
+    FILE *outFileptr = fopen("extra/10k_8x0y_filtered.txt", "w");
     if(outFileptr == NULL) {
         printf("error in opening outfile");
         exit(1);
@@ -119,14 +120,14 @@ static void *searchCompactBiomesThread(void *data) {
     int count = 0;
     int last_perc = -1;
     int hits = 0;
+    int64_t curr_seed;
     while (read_file_line(inFilePtr, seed)) {
-        if((int)((double)count/100000 * 100) > last_perc) {
-            last_perc = (int)((double)count/100000 * 100);
+        if((int)((double)count/10000 * 100) > last_perc) {
+            last_perc = (int)((double)count/10000 * 100);
             printf("\rProgress: %d%%", last_perc);
             fflush(stdout);
         }
 
-        int64_t curr_seed;
         sscanf(seed, "%" PRId64, &curr_seed);
 
         if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, curr_seed, ax, az, w, h, info.filter, 1) > 0) {
