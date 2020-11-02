@@ -10,6 +10,7 @@ struct compactinfo_t {
     int withHut, withMonument;
     int minscale;
     char * filepath;
+    int reporter;
 };
 
 #define MAXLINELENGTH 64
@@ -92,6 +93,7 @@ int main(int argc, char *argv[]) {
         
         // Add filepath to struct, will be freed inside thread function
         info[t].filepath = dest_filepath;
+        info[t].reporter = (t == num_threads - 1) ? 1 : 0;
 
     }
     // exit(1);
@@ -129,17 +131,15 @@ static void *searchCompactBiomesThread(void *data) {
     char outfilepath[MAXFILEPATHLENGTH];
     strcpy(outfilepath, info.filepath);
 
-    printf("%s\n", outfilepath);
     for(int i = 0; i < MAXFILEPATHLENGTH; ++i) {
-        if(outfilepath[i] == ".") {
-            outfilepath[i + 1] = '\0';
+        if(outfilepath[i] == '.') {
+            outfilepath[i] = '\0';
             strcat(outfilepath, "_filtered.txt");
             break;
         }
     }
-    pthread_exit(NULL);
 
-    FILE *outFileptr = fopen("extra/10k_8x0y_filtered.txt", "w");
+    FILE *outFileptr = fopen(outfilepath, "w");
     if(outFileptr == NULL) {
         printf("error in opening outfile");
         exit(1);
@@ -159,7 +159,7 @@ static void *searchCompactBiomesThread(void *data) {
     int hits = 0;
     int64_t curr_seed;
     while (read_file_line(inFilePtr, seed)) {
-        if((int)((double)count/num_lines * 100) > last_perc) {
+        if(info.reporter && (int)((double)count/num_lines * 100) > last_perc) {
             last_perc = (int)((double)count/num_lines * 100);
             printf("\rProgress: %d%%", last_perc);
             fflush(stdout);
@@ -175,7 +175,10 @@ static void *searchCompactBiomesThread(void *data) {
         }
         count++;
     }
-    printf("\nfound %d matches from %d seeds\n", hits, count);
+    if(info.reporter) {
+        printf("\rProgress: 100%%\n");
+    }
+    // printf("\nfound %d matches from %d seeds\n", hits, count);
     free(cache);
     free(info.filepath);
     pthread_exit(NULL);
