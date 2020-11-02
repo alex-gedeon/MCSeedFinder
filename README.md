@@ -32,3 +32,19 @@ Filter for seeds with quad witch huts and certain biomes efficiently.
   - yeah idea 2 is a lot easier and better
 - expand seedbank
   - should never be able to delete files, institute policty of 10m seeds minimum
+
+- filtering
+  - python
+    - read in filter type from user
+    - read in num to split from user
+    - pre-split in python according to mp.cpu_count()
+    - splits should be stored in quad_scans/tmp/{x}x{y}y_split{idx}.txt
+    - spawn one process for each split
+    - send master file to filter
+    - how many threads to create
+  - c
+    - read from those for each thread, given as info.filepath
+    - write into quad_scans/tmp/{x}x{y}y_split{idx}_filtered.txt
+  - python
+    - concatenate filtered seeds, sort, and dump into quad_scans/{x}x{y}_{filter type}_filtered.txt
+  

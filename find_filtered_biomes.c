@@ -23,11 +23,13 @@ int main(int argc, char *argv[]) {
     // argv[1] = #threads
     // argv[2] = range
     // argv[3] = filepath
+    // argv[4] = file size
     // argv[4:] = filter
     int THREADIDX = 1;
     int RANGEIDX = 2;
     int FILEPATHIDX = 3;
-    int NUMPARAMS = 4;
+    int FILESIZEIDX = 4;
+    int NUMPARAMS = 5;
 
     // arguments
     if (argc <= 4) {
@@ -36,6 +38,7 @@ int main(int argc, char *argv[]) {
                 "  threads       number of threads to use [uint, default=1]\n"
                 "  range         search range (in blocks) [uint, default=1024]\n"
                 "  filepath      path to main file\n"
+                "  file size     size of file to filter\n"
                 "  filter        space separated list of biome ids\n"
         );
         exit(1);
@@ -117,8 +120,8 @@ static void *searchCompactBiomesThread(void *data) {
     int last_perc = -1;
     int hits = 0;
     while (read_file_line(inFilePtr, seed)) {
-        if((int)((double)count/1000000 * 100) > last_perc) {
-            last_perc = (int)((double)count/1000000 * 100);
+        if((int)((double)count/100000 * 100) > last_perc) {
+            last_perc = (int)((double)count/100000 * 100);
             printf("\rProgress: %d%%", last_perc);
             fflush(stdout);
         }
