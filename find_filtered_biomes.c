@@ -2,6 +2,8 @@
 #include "generator.h"
 #include <stdio.h>
 
+int read_file_line(FILE *inFilePtr, char *seed);
+
 
 struct compactinfo_t {
     int64_t seedStart, seedEnd;
@@ -9,6 +11,7 @@ struct compactinfo_t {
     BiomeFilter filter;
     int withHut, withMonument;
     int minscale;
+    char * filepath;
 };
 
 #define MAXLINELENGTH 64
@@ -17,53 +20,35 @@ static void *searchCompactBiomesThread(void *data) {
     struct compactinfo_t info = *(struct compactinfo_t *)data;
     int ax = -info.range, az = -info.range;
     int w = 2*info.range, h = 2*info.range;
-    int64_t curr_seed;
 
     int mcversion = MC_1_14;
     LayerStack g;
     setupGenerator(&g, mcversion);
     int *cache = allocCache(&g.layers[L_VORONOI_ZOOM_1], w, h);
 
-    for (curr_seed = info.seedStart; curr_seed != info.seedEnd; curr_seed++) {
-        // if (!hasAllTemps(&g, s, 0, 0))
-        //     continue;
+    // Open seed file for reading
+    char seed[MAXLINELENGTH];
+    FILE *inFilePtr = fopen(info.filepath, "r");
+    if(inFilePtr == NULL) {
+        printf("error in opening %s\n", info.filepath);
+    }    
+
+    // Read in one seed at a time
+    int hits = 0;
+    while (read_file_line(inFilePtr, seed)) {
+        int64_t curr_seed;
+        sscanf(seed, "%" PRId64, &curr_seed);
 
         if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, curr_seed, ax, az, w, h, info.filter, 1) > 0) {
-            // int x, z;
-            // if (info.withHut) {
-            //     int r = info.range / SWAMP_HUT_CONFIG.regionSize;
-            //     for (z = -r; z < r; z++) {
-            //         for (x = -r; x < r; x++) {
-            //             Pos p;
-            //             p = getStructurePos(SWAMP_HUT_CONFIG, curr_seed, x, z, NULL);
-            //             if (isViableStructurePos(Swamp_Hut, mcversion, &g, curr_seed, p.x, p.z))
-            //                 goto L_hut_found;
-            //         }
-            //     }
-            //     continue;
-            //     L_hut_found:;
-            // }
-            // if (info.withMonument) {
-            //     int r = info.range / MONUMENT_CONFIG.regionSize;
-            //     for (z = -r; z < r; z++) {
-            //         for (x = -r; x < r; x++) {
-            //             Pos p;
-            //             p = getStructurePos(MONUMENT_CONFIG, curr_seed, x, z, NULL);
-            //             if (isViableStructurePos(Monument, mcversion, &g, curr_seed, p.x, p.z))
-            //                 goto L_monument_found;
-            //         }
-            //     }
-            //     continue;
-            //     L_monument_found:;
-            // }
-
+            hits++;
             printf("%" PRId64 "\n", curr_seed);
             fflush(stdout);
         }
     }
-
+    printf("%d\n", hits);
     free(cache);
     pthread_exit(NULL);
+
 }
 
 int read_file_line(FILE *inFilePtr, char *seed) {
@@ -111,8 +96,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Read in #threads and range
-    int num_threads = atoi(argv[1]);
-    int range1 = atoi(argv[2]);
+    unsigned int num_threads = atoi(argv[1]);
+    unsigned int search_range = atoi(argv[2]);
 
     // Read in filepath, remove .txt
     char * filepath = (char *) malloc(strlen(argv[3]));
@@ -126,29 +111,16 @@ int main(int argc, char *argv[]) {
         biome_filter[i-4] = atoi(argv[i]);
     }
 
-    // Open seed file for reading
-    char seed[MAXLINELENGTH];
-    FILE *inFilePtr = fopen(filepath, "r");
-    if(inFilePtr == NULL) {
-        printf("error in opening %s\n", filepath);
-    }
-
-    // Read in one seed at a time
-    while(read_file_line(inFilePtr, seed)) {
-        int64_t temp;
-        sscanf(seed, "%" PRId64, &temp);
-    }
-
     
 
 
 
     initBiomes();
 
-    int64_t seedStart, seedEnd;
-    unsigned int range;
+    // int64_t seedStart, seedEnd;
+    // unsigned int range;
     BiomeFilter filter;
-    int withHut, withMonument;
+    // int withHut, withMonument;
     int minscale;
 
 
@@ -159,9 +131,6 @@ int main(int argc, char *argv[]) {
     // TODO: simple structure filter
     // withHut = 0;
     // withMonument = 0;
-    free(biome_filter);
-    free(filepath);
-    exit(1);
 
     // printf("Starting search through seeds %" PRId64 " to %" PRId64", using %u threads.\n"
     //        "Search radius = %u.\n", seedStart, seedEnd, threads, range);
@@ -169,25 +138,31 @@ int main(int argc, char *argv[]) {
     thread_id_t threadID[num_threads];
     struct compactinfo_t info[num_threads];
 
+    // dont need to store start and end anymore
+
     // store thread information
-    uint64_t seedCnt = ((uint64_t)seedEnd - (uint64_t)seedStart) / num_threads;
-    for (int t = 0; t < num_threads; t++) {
-        info[t].seedStart = (int64_t)(seedStart + seedCnt * t);
-        info[t].seedEnd = (int64_t)(seedStart + seedCnt * (t+1));
-        info[t].range = range;
+    // uint64_t seedCnt = ((uint64_t)seedEnd - (uint64_t)seedStart) / num_threads;
+    for (unsigned int t = 0; t < num_threads; t++) {
+        // info[t].seedStart = (int64_t)(seedStart + seedCnt * t);
+        // info[t].seedEnd = (int64_t)(seedStart + seedCnt * (t+1));
+        info[t].range = search_range;
         info[t].filter = filter;
         // info[t].withHut = withHut;
         // info[t].withMonument = withMonument;
         info[t].minscale = minscale;
+        info[t].filepath = filepath;
     }
-    info[num_threads-1].seedEnd = seedEnd;
+    // info[num_threads-1].seedEnd = seedEnd;
 
     // start threads
-    for (int t = 0; t < num_threads; ++t) {
+    for (unsigned int t = 0; t < num_threads; ++t) {
         pthread_create(&threadID[t], NULL, searchCompactBiomesThread, (void*)&info[t]);
     }
 
-    for (int t = 0; t < num_threads; ++t) {
+    for (unsigned int t = 0; t < num_threads; ++t) {
         pthread_join(threadID[t], NULL);
     }
+    free(biome_filter);
+    free(filepath);
+    exit(1);
 }
