@@ -260,8 +260,3 @@ int genArea(const Layer *layer, int *out, int areaX, int areaZ, int areaWidth, i
     memset(out, 0, areaWidth*areaHeight*sizeof(*out));
     return layer->getMap(layer, out, areaX, areaZ, areaWidth, areaHeight);
 }
-
-
-
-
-

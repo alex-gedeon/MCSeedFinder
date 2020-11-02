@@ -29,33 +29,33 @@ static void *searchCompactBiomesThread(void *data) {
         //     continue;
 
         if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, curr_seed, ax, az, w, h, info.filter, 1) > 0) {
-            int x, z;
-            if (info.withHut) {
-                int r = info.range / SWAMP_HUT_CONFIG.regionSize;
-                for (z = -r; z < r; z++) {
-                    for (x = -r; x < r; x++) {
-                        Pos p;
-                        p = getStructurePos(SWAMP_HUT_CONFIG, curr_seed, x, z, NULL);
-                        if (isViableStructurePos(Swamp_Hut, mcversion, &g, curr_seed, p.x, p.z))
-                            goto L_hut_found;
-                    }
-                }
-                continue;
-                L_hut_found:;
-            }
-            if (info.withMonument) {
-                int r = info.range / MONUMENT_CONFIG.regionSize;
-                for (z = -r; z < r; z++) {
-                    for (x = -r; x < r; x++) {
-                        Pos p;
-                        p = getStructurePos(MONUMENT_CONFIG, curr_seed, x, z, NULL);
-                        if (isViableStructurePos(Monument, mcversion, &g, curr_seed, p.x, p.z))
-                            goto L_monument_found;
-                    }
-                }
-                continue;
-                L_monument_found:;
-            }
+            // int x, z;
+            // if (info.withHut) {
+            //     int r = info.range / SWAMP_HUT_CONFIG.regionSize;
+            //     for (z = -r; z < r; z++) {
+            //         for (x = -r; x < r; x++) {
+            //             Pos p;
+            //             p = getStructurePos(SWAMP_HUT_CONFIG, curr_seed, x, z, NULL);
+            //             if (isViableStructurePos(Swamp_Hut, mcversion, &g, curr_seed, p.x, p.z))
+            //                 goto L_hut_found;
+            //         }
+            //     }
+            //     continue;
+            //     L_hut_found:;
+            // }
+            // if (info.withMonument) {
+            //     int r = info.range / MONUMENT_CONFIG.regionSize;
+            //     for (z = -r; z < r; z++) {
+            //         for (x = -r; x < r; x++) {
+            //             Pos p;
+            //             p = getStructurePos(MONUMENT_CONFIG, curr_seed, x, z, NULL);
+            //             if (isViableStructurePos(Monument, mcversion, &g, curr_seed, p.x, p.z))
+            //                 goto L_monument_found;
+            //         }
+            //     }
+            //     continue;
+            //     L_monument_found:;
+            // }
 
             printf("%" PRId64 "\n", curr_seed);
             fflush(stdout);
@@ -118,7 +118,6 @@ int main(int argc, char *argv[]) {
     char * filepath = (char *) malloc(strlen(argv[3]));
     strcpy(filepath, argv[3]);
     // filepath[strlen(filepath) - 4] = '\0';
-    // printf("%s\n", filepath);
 
     // Read in filter
     int num_biomes = argc - 4;
@@ -127,12 +126,14 @@ int main(int argc, char *argv[]) {
         biome_filter[i-4] = atoi(argv[i]);
     }
 
+    // Open seed file for reading
     char seed[MAXLINELENGTH];
     FILE *inFilePtr = fopen(filepath, "r");
     if(inFilePtr == NULL) {
         printf("error in opening %s\n", filepath);
     }
 
+    // Read in one seed at a time
     while(read_file_line(inFilePtr, seed)) {
         int64_t temp;
         sscanf(seed, "%" PRId64, &temp);
@@ -150,17 +151,17 @@ int main(int argc, char *argv[]) {
     int withHut, withMonument;
     int minscale;
 
-    free(biome_filter);
-    free(filepath);
-    exit(1);
 
     // TODO: set up a customisable biome filter
     filter = setupBiomeFilter(XAND_BIOMES,
                 sizeof(XAND_BIOMES)/sizeof(int));
     minscale = 1; // terminate search at this layer scale
     // TODO: simple structure filter
-    withHut = 0;
-    withMonument = 0;
+    // withHut = 0;
+    // withMonument = 0;
+    free(biome_filter);
+    free(filepath);
+    exit(1);
 
     // printf("Starting search through seeds %" PRId64 " to %" PRId64", using %u threads.\n"
     //        "Search radius = %u.\n", seedStart, seedEnd, threads, range);
@@ -175,8 +176,8 @@ int main(int argc, char *argv[]) {
         info[t].seedEnd = (int64_t)(seedStart + seedCnt * (t+1));
         info[t].range = range;
         info[t].filter = filter;
-        info[t].withHut = withHut;
-        info[t].withMonument = withMonument;
+        // info[t].withHut = withHut;
+        // info[t].withMonument = withMonument;
         info[t].minscale = minscale;
     }
     info[threads-1].seedEnd = seedEnd;
