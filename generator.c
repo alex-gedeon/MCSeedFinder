@@ -258,5 +258,6 @@ void applySeed(LayerStack *g, int64_t seed)
 int genArea(const Layer *layer, int *out, int areaX, int areaZ, int areaWidth, int areaHeight)
 {
     memset(out, 0, areaWidth*areaHeight*sizeof(*out));
+    printf("in gen\n");
     return layer->getMap(layer, out, areaX, areaZ, areaWidth, areaHeight);
 }
