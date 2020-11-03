@@ -57,7 +57,7 @@ enum
     L_RIVER_4,
     L_SMOOTH_4_RIVER,
     L_RIVER_MIX_4,
-    L_VORONOI_ZOOM_1,
+    L_VORONOI_ZOOM_1,  // gives fr ocean
 
     // 1.13 layers
     L13_OCEAN_TEMP_256,
@@ -67,7 +67,7 @@ enum
     L13_ZOOM_16,
     L13_ZOOM_8,
     L13_ZOOM_4,
-    L13_OCEAN_MIX_4,
+    L13_OCEAN_MIX_4,  // gives fr ocean
 
     // 1.14 layers
     L14_BAMBOO_256,
@@ -75,6 +75,14 @@ enum
     // largeBiomes layers
     L_ZOOM_LARGE_BIOME_A,
     L_ZOOM_LARGE_BIOME_B,
+
+    // custom layers
+//     L13_OCEAN_MIX_16,
+//     L_RIVER_MIX_16,
+//     L_SMOOTH_16,
+//     L_RIVER_16,
+//     L_SMOOTH_16_RIVER,
+
 
     L_NUM
 };

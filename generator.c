@@ -43,7 +43,7 @@ static void setupScale(Layer *l, int scale)
     else if (map == mapVoronoiZoom)
     {
         m = 4;
-        e = 7;
+        e = 7; // was 7
     }
     else if (map == mapOceanMix)
     {
@@ -182,11 +182,21 @@ static void setupGeneratorImpl(LayerStack *g, int mcversion, int largeBiomes)
 
         setupMultiLayer(&l[L13_OCEAN_MIX_4], &l[L_RIVER_MIX_4], &l[L13_ZOOM_4], 100, mapOceanMix);
 
+        // custom layers
+        // setupLayer(&l[L_RIVER_16],             &l[L_ZOOM_16_RIVER],         1,    mapRiver);
+        // setupLayer(&l[L_SMOOTH_16_RIVER],      &l[L_RIVER_16],              1000, mapSmooth);
+
+        // setupLayer(&l[L_SMOOTH_16],           &l[L_ZOOM_16],               1000, mapSmooth);
+        // setupMultiLayer(&l[L_RIVER_MIX_16], &l[L_SMOOTH_16], &l[L_SMOOTH_16_RIVER], 100, mapRiverMix);  // river mix 16
+        // setupMultiLayer(&l[L13_OCEAN_MIX_16], &l[L_RIVER_MIX_16], &l[L13_ZOOM_16], 100, mapOceanMix);
+
+        // end
+
         setupLayer(&l[L_VORONOI_ZOOM_1],   &l[L13_OCEAN_MIX_4],       10,   mapVoronoiZoom);
         g->entry_4 = &l[L13_OCEAN_MIX_4];
     }
 
-    setupScale(&l[L_VORONOI_ZOOM_1], 1);
+    setupScale(&l[L_VORONOI_ZOOM_1], 4);
     g->entry_1 = &l[L_VORONOI_ZOOM_1];
 }
 

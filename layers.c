@@ -1482,6 +1482,10 @@ int mapShore(const Layer * l, int * out, int x, int z, int w, int h)
             int v21 = vz1[i+2];
             int v01 = vz1[i+0];
             int v12 = vz2[i+1];
+            if(v11 == 10 || v10 == 10 || v21 == 10 || v01 == 10 || v12 == 10) {
+                printf("in shore layers 1462\n");
+                exit(1);
+            }
 
             int biome = biomeExists(v11) ? v11 : 0;
 
@@ -1510,6 +1514,10 @@ int mapShore(const Layer * l, int * out, int x, int z, int w, int h)
             {
                 if (isBiomeSnowy(biome))
                 {
+                    if(v11 == 10) {
+                        printf("frozen ocean in layers 1514!\n");
+                        exit(1);
+                    }
                     replaceOcean(out, i + j*w, v10, v21, v01, v12, v11, snowy_beach);
                 }
                 else if (v11 != badlands && v11 != wooded_badlands_plateau)

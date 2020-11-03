@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     LayerStack g;
     setupGenerator(&g, MC_1_16);
     // Extract the desired layer.
-    Layer *layer = &g.layers[L_SHORE_16];
+    Layer *layer = &g.layers[L13_OCEAN_MIX_4];  // L13_OCEAN_MIX_4 generates frozen oceans, original: L_SHORE_16
 
     unsigned int scale = 4;
     unsigned int imgWidth = areaWidth*scale, imgHeight = areaHeight*scale;
