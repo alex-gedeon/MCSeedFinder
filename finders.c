@@ -1758,8 +1758,6 @@ static int mapFilterBiome(const Layer * l, int * out, int x, int z, int w, int h
 
 static int mapFilterOceanTemp(const Layer * l, int * out, int x, int z, int w, int h)
 {
-    printf("in temps\n");
-    exit(1);
     const BiomeFilter *bf = (const BiomeFilter*) l->data;
     int i, j;
     uint64_t b;

@@ -135,6 +135,9 @@ int biomesToImage(unsigned char *pixels,
         for (i = 0; i < sx; i++)
         {
             int id = biomes[j*sx+i];
+            if(id == 10) {
+                printf("frozen ocean!\n");
+            }
             unsigned int r, g, b;
 
             if (id < 0 || id >= 256)
