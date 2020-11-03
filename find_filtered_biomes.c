@@ -11,6 +11,7 @@ struct compactinfo_t {
     int minscale;
     char * filepath;
     int reporter;
+    int num_threads;
 };
 
 #define MAXLINELENGTH 64
@@ -94,6 +95,7 @@ int main(int argc, char *argv[]) {
         // Add filepath to struct, will be freed inside thread function
         info[t].filepath = dest_filepath;
         info[t].reporter = (t == num_threads - 1) ? 1 : 0;
+        info[t].num_threads = num_threads;
 
     }
     // exit(1);
@@ -172,12 +174,16 @@ static void *searchCompactBiomesThread(void *data) {
             // fflush(stdout);
             fprintf(outFileptr, "%" PRId64 "\n", curr_seed);
             hits++;
+            if(info.num_threads * hits > 1000) {
+                printf("Hit 1000, stopping\n");
+                break;
+            }
         }
         count++;
     }
     if(info.reporter) {
         printf("\rProgress: 100%%\n");
-        printf("\nfound %d matches from %d seeds\n", hits, count);
+        printf("\nFound %d matches - approximately %d total - from %d/%d seeds\n", hits, info.num_threads * hits, count, count * info.num_threads);
     }
     free(cache);
     free(info.filepath);
