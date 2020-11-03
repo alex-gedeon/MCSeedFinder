@@ -169,7 +169,7 @@ static void *searchCompactBiomesThread(void *data) {
     while (read_file_line(inFilePtr, seed)) {
         if(info.reporter && (int)((double)count/num_lines * 100) > last_perc) {
             last_perc = (int)((double)count/num_lines * 100);
-            printf("\rProgress: %d%%", last_perc);
+            printf("\rProgress: %d%%, found %d so far", last_perc, hits);
             fflush(stdout);
         }
 
@@ -191,7 +191,7 @@ static void *searchCompactBiomesThread(void *data) {
         count++;
     }
     if(info.reporter) {
-        printf("\rProgress: 100%%\n");
+        printf("\rProgress: 100%%               \n");
         max_hits:;
         printf("\nFound %d matches - approximately %d total - from %d/%d seeds\n", hits, info.num_threads * hits, count, count*info.num_threads);
     }
