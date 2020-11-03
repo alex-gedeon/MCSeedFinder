@@ -14,7 +14,8 @@ for root, dirs, files in os.walk("seed_bank/"):
         fil = fil.split("_")[1].split(".")[0]
         s_coords.append(fil)
 
-for SEARCH_COORDS in s_coords:
+for s_idx, SEARCH_COORDS in enumerate(s_coords):
+    print(f"Starting search in {SEARCH_COORDS}, {s_idx}/{len(s_coords)} done")
     # MASTER_FILE = f"extra/100k_{SEARCH_COORDS}.txt"
     MASTER_FILE = f"seed_bank/quadbank_{SEARCH_COORDS}.txt"
     EXPORT_FOLDER = BASE_DIR + SEARCH_COORDS + "/"
@@ -45,7 +46,8 @@ for SEARCH_COORDS in s_coords:
     make_splits()
 
     # Set up filter
-    filter = ["giant_tree_taiga_hills", "jungle", "shattered_savanna", "ice_spikes", "badlands", "frozen_ocean", "warm_ocean"]
+    filter = ["jungle", "shattered_savanna", "ice_spikes", "badlands", "frozen_ocean", "warm_ocean"]
+    # filter = ["giant_tree_taiga_hills", "jungle", "shattered_savanna", "ice_spikes", "badlands", "frozen_ocean", "warm_ocean"]
     idict = ut.get_lookup_table()
     enum_ints = sorted([idict[key] for key in filter])  # todo: make sure if sorting is needed
     enum_ints = [str(val) for val in enum_ints]
@@ -88,5 +90,11 @@ for SEARCH_COORDS in s_coords:
         shutil.rmtree(photo_path)
     ut.convert_all_ppm_to_png(filtered_lines, photo_path)
 
-print()
+if os.path.exists('quad_scans/all/'):
+    shutil.rmtree('quad_scans/all/')
+else:
+    os.mkdir('quad_scans/all/')
+os.system('cp quad_scans/*/generated/* quad_scans/all')
+
+print("\nResults:")
 os.system('echo "Found" $(find quad_scans/*/generated/* | wc -l) "matches out of" $(cat seed_bank/* | wc -l) "total"')
