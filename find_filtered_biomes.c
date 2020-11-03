@@ -54,6 +54,7 @@ int main(int argc, char *argv[]) {
     // Read in filepath, remove .txt
     char * filepath = (char *) malloc(MAXFILEPATHLENGTH);
     strcpy(filepath, argv[FILEPATHIDX]);
+    printf("Scanning %s with", filepath);
     filepath[strlen(argv[FILEPATHIDX]) - 4] = '\0';
     strcat(filepath, "_split");
 
@@ -62,7 +63,10 @@ int main(int argc, char *argv[]) {
     int * biome_filter = (int *) malloc(sizeof(int) * (num_biomes));
     for(int i = NUMPARAMS; i < argc; ++i) {
         biome_filter[i-NUMPARAMS] = atoi(argv[i]);
+        printf(" %d", atoi(argv[i]));
     }
+    printf("\n");
+
 
     initBiomes();
 
@@ -150,8 +154,10 @@ static void *searchCompactBiomesThread(void *data) {
     // Find number of lines in file
     char buf[MAXLINELENGTH];
     int num_lines = 0;
-    while(fgets(buf, MAXLINELENGTH, inFilePtr) != NULL) {
-        num_lines++;
+    if(info.reporter) {
+        while(fgets(buf, MAXLINELENGTH, inFilePtr) != NULL) {
+            num_lines++;
+        }
     }
     rewind(inFilePtr);
 
@@ -183,7 +189,7 @@ static void *searchCompactBiomesThread(void *data) {
     }
     if(info.reporter) {
         printf("\rProgress: 100%%\n");
-        printf("\nFound %d matches - approximately %d total - from %d/%d seeds\n", hits, info.num_threads * hits, count, count * info.num_threads);
+        printf("\nFound %d matches - approximately %d total - from %d/%d seeds\n", hits, info.num_threads * hits, count, num_lines);
     }
     free(cache);
     free(info.filepath);

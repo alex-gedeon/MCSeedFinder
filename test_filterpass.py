@@ -9,6 +9,7 @@ SEARCH_COORDS = "8x0y"
 MASTER_FILE = f"seed_bank/quadbank_{SEARCH_COORDS}.txt"
 TMP_DIR = "quad_scans/tmp/"
 BASE_DIR = "quad_scans/"
+EXPORT_FOLDER = BASE_DIR + SEARCH_COORDS + "/"
 SEARCH_RANGE = 1024
 
 def make_splits():
@@ -36,7 +37,7 @@ def make_splits():
 # make_splits()
 
 # Set up filter
-filter = ["jungle", "shattered_savanna", "ice_spikes", "badlands", "frozen_ocean"]
+filter = ["frozen_ocean"]# ["jungle", "shattered_savanna", "ice_spikes", "badlands", "frozen_ocean"]
 idict = ut.get_lookup_table()
 enum_ints = sorted([idict[key] for key in filter])  # todo: make sure if sorting is needed
 enum_ints = [str(val) for val in enum_ints]
@@ -52,18 +53,29 @@ args = [
 for enum_int in enum_ints:
     args.append(enum_int)
 
-# filter_process = subprocess.Popen(args)
-# filter_process.wait()
+# Run search
+filter_process = subprocess.Popen(args)
+filter_process.wait()
 
 import util as ut
 
 # read in and concat
 
-export_file = open(BASE_DIR + SEARCH_COORDS + "_filtered.txt", "w")
+if not os.path.exists(EXPORT_FOLDER):
+    os.mkdir(EXPORT_FOLDER)
+
+EXPORT_PATH = EXPORT_FOLDER + SEARCH_COORDS + "_filtered.txt"
+export_file = open(EXPORT_PATH, "w")
 
 for idx in range(mp.cpu_count()):
     fil_path = TMP_DIR + SEARCH_COORDS + "_split" + str(idx) + "_filtered.txt"
     filtered_lines = open(fil_path).readlines()
     export_file.writelines(filtered_lines)
-    # os.remove(fil_path)
 export_file.close()
+
+# print(EXPORT_PATH)
+filtered_lines = open(EXPORT_PATH).readlines()
+photo_path = EXPORT_FOLDER + "generated/"
+if os.path.exists(photo_path):
+    shutil.rmtree(photo_path)
+ut.convert_all_ppm_to_png(filtered_lines[:100], photo_path)

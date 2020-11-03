@@ -79,7 +79,7 @@ def filter_quadseeds(quadfile, outfile):
     print(f"Searched {len(quads)} seeds, found {num_found} matches!")
 
 
-def convert_all_ppm_to_png(seedlist, folder, xsize=256, ysize=256):
+def convert_all_ppm_to_png(seedlist, folder, xsize=512, ysize=256):
     """Create png image given seed and folder."""
 
     # Create folder, make sure it exists
