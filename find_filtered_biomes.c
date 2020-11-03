@@ -177,8 +177,8 @@ static void *searchCompactBiomesThread(void *data) {
     }
     if(info.reporter) {
         printf("\rProgress: 100%%\n");
+        printf("\nfound %d matches from %d seeds\n", hits, count);
     }
-    // printf("\nfound %d matches from %d seeds\n", hits, count);
     free(cache);
     free(info.filepath);
     pthread_exit(NULL);

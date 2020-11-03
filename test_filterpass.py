@@ -4,8 +4,8 @@ from multiprocessing import cpu_count
 import shutil
 
 SEARCH_COORDS = "8x0y"
-MASTER_FILE = f"extra/100k_{SEARCH_COORDS}.txt"
-# MASTER_FILE = f"seed_bank/quadbank_{SEARCH_COORDS}.txt"
+# MASTER_FILE = f"extra/100k_{SEARCH_COORDS}.txt"
+MASTER_FILE = f"seed_bank/quadbank_{SEARCH_COORDS}.txt"
 TMP_DIR = "quad_scans/tmp/"
 
 def make_splits():
@@ -33,7 +33,7 @@ def make_splits():
 make_splits()
 
 # Set up filter
-filter = ["jungle", "shattered_savanna", "ice_spikes"]#, "badlands"]
+filter = ["jungle", "shattered_savanna", "ice_spikes", "badlands"]
 idict = ut.get_lookup_table()
 enum_ints = sorted([idict[key] for key in filter])
 enum_ints = [str(val) for val in enum_ints]
