@@ -4,9 +4,18 @@ import multiprocessing as mp
 import shutil
 import subprocess
 
+with open('filters/simple_filters.txt') as filter_file:
+    fil_lines = filter_file.readlines()
+    print("Select a filter out of the following:")
+    for idx, line in enumerate(fil_lines):
+        print(f"    {idx}: {line.strip()}")
+filter_selection = int(input())
+user_filter = fil_lines[filter_selection]
+user_filter = [val.strip() for val in user_filter.split(', ')]
+
 SEARCH_COORDS = "8x0y"
 TMP_DIR = "quad_scans/tmp/"
-BASE_DIR = "quad_scans/"
+BASE_DIR = f"quad_scans/filter_{filter_selection}/"
 
 s_coords = []
 for root, dirs, files in os.walk("seed_bank/"):
@@ -46,11 +55,11 @@ for s_idx, SEARCH_COORDS in enumerate(s_coords):
     make_splits()
 
     # Set up filter
-    filter = ["jungle", "shattered_savanna", "ice_spikes", "badlands", "frozen_ocean", "warm_ocean"]
+    # user_filter = ["jungle", "shattered_savanna", "ice_spikes", "warm_ocean", "mushroom_fields"]
+    # filter = ["jungle", "shattered_savanna", "ice_spikes", "badlands", "frozen_ocean", "warm_ocean"]
     # filter = ["giant_tree_taiga_hills", "jungle", "shattered_savanna", "ice_spikes", "badlands", "frozen_ocean", "warm_ocean"]
     idict = ut.get_lookup_table()
-    enum_ints = sorted([idict[key] for key in filter])  # todo: make sure if sorting is needed
-    enum_ints = [str(val) for val in enum_ints]
+    enum_ints = [str(idict[key]) for key in user_filter]
 
     # os.system(f'./find_filtered_biomes {mp.cpu_count()} 1024 {TMP_DIR + SEARCH_COORDS + ".txt"} {" ".join(enum_ints)}')
 
@@ -71,6 +80,8 @@ for s_idx, SEARCH_COORDS in enumerate(s_coords):
 
     # read in and concat
 
+    if not os.path.exists(BASE_DIR):
+        os.mkdir(BASE_DIR)
     if not os.path.exists(EXPORT_FOLDER):
         os.mkdir(EXPORT_FOLDER)
 
@@ -90,11 +101,14 @@ for s_idx, SEARCH_COORDS in enumerate(s_coords):
         shutil.rmtree(photo_path)
     ut.convert_all_ppm_to_png(filtered_lines, photo_path)
 
-if os.path.exists('quad_scans/all/'):
-    shutil.rmtree('quad_scans/all/')
+ALL_PATH = BASE_DIR + "/all"
+
+if os.path.exists(ALL_PATH):
+    shutil.rmtree(ALL_PATH)
+    os.mkdir(ALL_PATH)
 else:
-    os.mkdir('quad_scans/all/')
-os.system('cp quad_scans/*/generated/* quad_scans/all')
+    os.mkdir(ALL_PATH)
+os.system(f'cp {BASE_DIR}/*/generated/* {ALL_PATH}')
 
 print("\nResults:")
-os.system('echo "Found" $(find quad_scans/*/generated/* | wc -l) "matches out of" $(cat seed_bank/* | wc -l) "total"')
+os.system(f'echo "Found" $(find {BASE_DIR}*/generated/* | wc -l) "matches out of" $(cat seed_bank/* | wc -l) "total"')
