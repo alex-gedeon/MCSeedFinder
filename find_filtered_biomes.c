@@ -180,8 +180,11 @@ static void *searchCompactBiomesThread(void *data) {
             // fflush(stdout);
             fprintf(outFileptr, "%" PRId64 "\n", curr_seed);
             hits++;
-            if(info.num_threads * hits > 1000) {
-                printf("Hit 1000, stopping\n");
+            if(info.num_threads * hits > 500) {
+                if(info.reporter) {
+                    printf("\nHit 500, stopping\n");
+                    goto max_hits;
+                }
                 break;
             }
         }
@@ -189,7 +192,8 @@ static void *searchCompactBiomesThread(void *data) {
     }
     if(info.reporter) {
         printf("\rProgress: 100%%\n");
-        printf("\nFound %d matches - approximately %d total - from %d/%d seeds\n", hits, info.num_threads * hits, count, num_lines);
+        max_hits:;
+        printf("\nFound %d matches - approximately %d total - from %d/%d seeds\n", hits, info.num_threads * hits, count, count*info.num_threads);
     }
     free(cache);
     free(info.filepath);

@@ -37,7 +37,7 @@ def make_splits():
 # make_splits()
 
 # Set up filter
-filter = ["frozen_ocean"]# ["jungle", "shattered_savanna", "ice_spikes", "badlands", "frozen_ocean"]
+filter = ["jungle", "shattered_savanna", "ice_spikes", "badlands", "frozen_ocean"]
 idict = ut.get_lookup_table()
 enum_ints = sorted([idict[key] for key in filter])  # todo: make sure if sorting is needed
 enum_ints = [str(val) for val in enum_ints]
@@ -78,4 +78,4 @@ filtered_lines = open(EXPORT_PATH).readlines()
 photo_path = EXPORT_FOLDER + "generated/"
 if os.path.exists(photo_path):
     shutil.rmtree(photo_path)
-ut.convert_all_ppm_to_png(filtered_lines[:100], photo_path)
+ut.convert_all_ppm_to_png(filtered_lines, photo_path)
