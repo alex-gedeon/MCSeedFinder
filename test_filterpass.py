@@ -3,6 +3,10 @@ import os
 import multiprocessing as mp
 import shutil
 import subprocess
+import click
+
+def main():
+    pass
 
 with open('filters/simple_filters.txt') as filter_file:
     fil_lines = filter_file.readlines()

@@ -14,23 +14,16 @@ endif
 
 .PHONY : all release debug libcubiomes clean
 
-all: find_filtered_biomes find_quadhuts find_compactbiomes image_generator
-# all: release
+all: release
 
 debug: CFLAGS += -DDEBUG -O0 -ggdb3
-debug: libcubiomes find_quadhuts find_compactbiomes image_generator
+debug: libcubiomes find_quadhuts image_generator find_filtered_biomes
 release: CFLAGS += -O3 -march=native
-release: libcubiomes find_quadhuts find_compactbiomes image_generator
+release: libcubiomes find_quadhuts image_generator find_filtered_biomes
 
 libcubiomes: CFLAGS += -fPIC
 libcubiomes: layers.o generator.o finders.o util.o
 	$(AR) $(ARFLAGS) libcubiomes.a $^
-
-find_compactbiomes: find_compactbiomes.o layers.o generator.o finders.o
-	$(CC) -o $@ $^ $(LDFLAGS)
-
-find_compactbiomes.o: find_compactbiomes.c generator.h
-	$(CC) -c $(CFLAGS) $<
 
 find_quadhuts: find_quadhuts.o layers.o generator.o finders.o 
 	$(CC) -o $@ $^ $(LDFLAGS)
@@ -56,11 +49,11 @@ util.o: util.c util.h
 image_generator.o: image_generator.c util.h generator.h
 	$(CC) -c $(CFLAGS) $<
 	
-clean:
-	$(RM) *.o libcubiomes.a find_quadhuts find_compactbiomes image_generator
-
 find_filtered_biomes.o: find_filtered_biomes.c generator.h
 	$(CC) -c $(CFLAGS) $<
 
 find_filtered_biomes: find_filtered_biomes.o layers.o generator.o finders.o
 	$(CC) -o $@ $^ $(LDFLAGS)
+
+clean:
+	$(RM) *.o libcubiomes.a find_quadhuts find_compactbiomes image_generator find_filtered_biomes
