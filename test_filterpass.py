@@ -16,6 +16,7 @@ user_filter = [val.strip() for val in user_filter.split(', ')]
 SEARCH_COORDS = "8x0y"
 TMP_DIR = "quad_scans/tmp/"
 BASE_DIR = f"quad_scans/filter_{filter_selection}/"
+SEARCH_RANGE = 1024
 
 s_coords = []
 for root, dirs, files in os.walk("seed_bank/"):
@@ -28,7 +29,6 @@ for s_idx, SEARCH_COORDS in enumerate(s_coords):
     # MASTER_FILE = f"extra/100k_{SEARCH_COORDS}.txt"
     MASTER_FILE = f"seed_bank/quadbank_{SEARCH_COORDS}.txt"
     EXPORT_FOLDER = BASE_DIR + SEARCH_COORDS + "/"
-    SEARCH_RANGE = 1024
 
     def make_splits():
         if not os.path.exists(TMP_DIR):
@@ -52,7 +52,7 @@ for s_idx, SEARCH_COORDS in enumerate(s_coords):
             with open(TMP_DIR + SEARCH_COORDS + "_split" + str(idx) + ".txt", 'w') as outfile:
                 outfile.writelines(split)
         
-    make_splits()
+    # make_splits()
 
     # Set up filter
     # user_filter = ["jungle", "shattered_savanna", "ice_spikes", "warm_ocean", "mushroom_fields"]
@@ -101,7 +101,7 @@ for s_idx, SEARCH_COORDS in enumerate(s_coords):
         shutil.rmtree(photo_path)
     ut.convert_all_ppm_to_png(filtered_lines, photo_path)
 
-ALL_PATH = BASE_DIR + "/all"
+ALL_PATH = BASE_DIR + "all"
 
 if os.path.exists(ALL_PATH):
     shutil.rmtree(ALL_PATH)
