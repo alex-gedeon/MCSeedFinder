@@ -5,8 +5,13 @@ import shutil
 import subprocess
 import click
 
+@click.command()
+@click.option('--search_range', type=int, default=1024)
+@click.option('--filter', type=str, default=None)
 def main():
     pass
+
+exit()
 
 with open('filters/simple_filters.txt') as filter_file:
     fil_lines = filter_file.readlines()
