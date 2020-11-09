@@ -256,6 +256,7 @@ def run_biome_scan(biome_ids, search_coords, search_range, tmp_dir="quad_scans/t
 
 
 def aggregate_scan(filter_id, search_coords, search_range, scan_folder="quad_scans/", tmp_dir="quad_scans/tmp/"):
+    """Aggregate filtered splits and return path."""
     base_dir = f"{scan_folder}filter{filter_id}_{search_range}r/"
     export_folder = base_dir + search_coords + "/"
     if not os.path.exists(base_dir):
@@ -277,11 +278,13 @@ def aggregate_scan(filter_id, search_coords, search_range, scan_folder="quad_sca
 
 
 def generate_images(export_filepath):
+    """Generate png images of matched seeds."""
     generated_path = os.path.dirname(export_filepath) + "/generated/"
     filtered_lines = open(export_filepath).readlines()
     if os.path.exists(generated_path):
         shutil.rmtree(generated_path)
     convert_all_ppm_to_png(filtered_lines, generated_path)
 
+    # Copy images to all/ directory also
     all_path = os.path.dirname(os.path.dirname(export_filepath)) + "/all/"
-    os.system(f'cp {generated_path}* {all_path} 2>/dev/null')
+    os.system(f'cp {generated_path}* {all_path} 2>/dev/null')  # ignore error if no matches
