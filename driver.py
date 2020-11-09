@@ -5,11 +5,34 @@ import shutil
 import subprocess
 import click
 
+def get_filter(given_filter=None, filter_path='biome_filters.txt'):
+    """Read in user-defined filter from file."""
+    fil_lines = open(filter_path).readlines()
+    if len(fil_lines) == 0:
+        print("Error: no filters found in", filter_path)
+        exit(1)
+
+    # Only query user if option is not used
+    if given_filter is None:
+        print("Select a filter out of the following:")
+        for idx, line in enumerate(fil_lines):
+            print(f"    {idx}: {line.strip()}")
+        filter_selection = int(input())
+    else:
+        filter_selection = given_filter
+    user_filter = fil_lines[filter_selection]
+    user_filter = [val.strip() for val in user_filter.split(', ')]
+    return user_filter
+
+
 @click.command()
 @click.option('--search_range', type=int, default=1024)
-@click.option('--filter', type=str, default=None)
-def main():
-    pass
+@click.option('--biome_filter', type=int, default=None)
+def main(search_range, biome_filter):
+    user_filter = get_filter(given_filter=biome_filter)
+
+if __name__ == "__main__":
+    main()
 
 exit()
 
