@@ -16,3 +16,4 @@ old/*
 find_filtered_biomes
 filters/
 extra/
+biome_filters.txt

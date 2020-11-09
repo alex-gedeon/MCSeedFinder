@@ -28,7 +28,7 @@ def scan_quadseeds(qx, qy, search_time, quadfile):
 
 def filter_quadseeds(quadfile, outfile):
     if os.path.exists(outfile):
-            os.remove(outfile)
+        os.remove(outfile)
     print("\nFiltering seeds as per generator.h...")
     # Open and sort quadfile
     quads = open(quadfile).readlines()
@@ -54,7 +54,7 @@ def filter_quadseeds(quadfile, outfile):
         print("\rProgress: 100%   ")
 
     # Determine number of processes and splits per process
-    num_processes = 1#mp.cpu_count()
+    num_processes = 1  # mp.cpu_count()
     even_split = len(quads) // num_processes
 
     processpool = []
@@ -129,6 +129,7 @@ def convert_all_ppm_to_png(seedlist, folder, xsize=1024, ysize=512):
     # Attempt to join processes
     for process in processpool:
         process.join()
+
 
 def get_lookup_table():
     return {
@@ -212,3 +213,38 @@ def get_lookup_table():
         "end_barrens": 43,
         "the_void": 127,
     }
+
+
+def get_filter(given_filter=None, filter_path='biome_filters.txt'):
+    """Read in user-defined filter from file."""
+    if not os.path.exists(filter_path):
+        open(filter_path, 'w').close()
+    fil_lines = open(filter_path).readlines()
+    if len(fil_lines) == 0:
+        print("Error: no filters found in", filter_path)
+        exit(1)
+
+    # Only query user if option is not used
+    if given_filter is None:
+        print("Select a filter out of the following:")
+        for idx, line in enumerate(fil_lines):
+            print(f"    {idx}: {line.strip()}")
+        filter_selection = int(input())
+    else:
+        filter_selection = given_filter
+    user_filter = fil_lines[filter_selection]
+    user_filter = [val.strip() for val in user_filter.split(', ')]
+    return user_filter
+
+def get_search_coords(bank_folder="seed_bank/"):
+    if not os.path.exists(bank_folder):
+        os.mkdir(bank_folder)
+    s_coords = []
+    for _, _, files in os.walk(bank_folder):
+        for fil in files:
+            fil = fil.split("_")[1].split(".")[0]
+            s_coords.append(fil)
+    if len(s_coords) == 0:
+        print("Error: no seed files found, generate some with ./find_quadhuts")
+        exit(1)
+    return s_coords

@@ -5,56 +5,34 @@ import shutil
 import subprocess
 import click
 
-def get_filter(given_filter=None, filter_path='biome_filters.txt'):
-    """Read in user-defined filter from file."""
-    fil_lines = open(filter_path).readlines()
-    if len(fil_lines) == 0:
-        print("Error: no filters found in", filter_path)
-        exit(1)
 
-    # Only query user if option is not used
-    if given_filter is None:
-        print("Select a filter out of the following:")
-        for idx, line in enumerate(fil_lines):
-            print(f"    {idx}: {line.strip()}")
-        filter_selection = int(input())
-    else:
-        filter_selection = given_filter
-    user_filter = fil_lines[filter_selection]
-    user_filter = [val.strip() for val in user_filter.split(', ')]
-    return user_filter
+
 
 
 @click.command()
 @click.option('--search_range', type=int, default=1024)
 @click.option('--biome_filter', type=int, default=None)
 def main(search_range, biome_filter):
-    user_filter = get_filter(given_filter=biome_filter)
+    user_filter = ut.get_filter(given_filter=biome_filter)
+    print(f"Scanning with {', '.join(user_filter[:])}")
+
+    search_coords = ut.get_search_coords()
+    print(search_coords)
+
+    for s_idx, s_coord in enumerate(search_coords):
+        pass
+
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=no-value-for-parameter
 
 exit()
-
-with open('filters/simple_filters.txt') as filter_file:
-    fil_lines = filter_file.readlines()
-    print("Select a filter out of the following:")
-    for idx, line in enumerate(fil_lines):
-        print(f"    {idx}: {line.strip()}")
-filter_selection = int(input())
-user_filter = fil_lines[filter_selection]
-user_filter = [val.strip() for val in user_filter.split(', ')]
 
 SEARCH_COORDS = "8x0y"
 TMP_DIR = "quad_scans/tmp/"
 BASE_DIR = f"quad_scans/filter_{filter_selection}/"
 SEARCH_RANGE = 1024
 
-s_coords = []
-for root, dirs, files in os.walk("seed_bank/"):
-    for fil in files:
-        fil = fil.split("_")[1].split(".")[0]
-        s_coords.append(fil)
 
 for s_idx, SEARCH_COORDS in enumerate(s_coords):
     print(f"Starting search in {SEARCH_COORDS}, {s_idx}/{len(s_coords)} done")
@@ -80,10 +58,11 @@ for s_idx, SEARCH_COORDS in enumerate(s_coords):
             if idx == num_splits - 1:
                 split = master_lines[idx*even_split:]
             else:
-                split = master_lines[idx*even_split:idx*even_split + even_split]
+                split = master_lines[idx*even_split:idx *
+                                     even_split + even_split]
             with open(TMP_DIR + SEARCH_COORDS + "_split" + str(idx) + ".txt", 'w') as outfile:
                 outfile.writelines(split)
-        
+
     # make_splits()
 
     # Set up filter
@@ -96,10 +75,10 @@ for s_idx, SEARCH_COORDS in enumerate(s_coords):
     # os.system(f'./find_filtered_biomes {mp.cpu_count()} 1024 {TMP_DIR + SEARCH_COORDS + ".txt"} {" ".join(enum_ints)}')
 
     args = [
-            './find_filtered_biomes',
-            str(mp.cpu_count()),
-            str(SEARCH_RANGE),
-            TMP_DIR + SEARCH_COORDS + ".txt"
+        './find_filtered_biomes',
+        str(mp.cpu_count()),
+        str(SEARCH_RANGE),
+        TMP_DIR + SEARCH_COORDS + ".txt"
     ]
     for enum_int in enum_ints:
         args.append(enum_int)
@@ -121,7 +100,8 @@ for s_idx, SEARCH_COORDS in enumerate(s_coords):
     export_file = open(EXPORT_PATH, "w")
 
     for idx in range(mp.cpu_count()):
-        fil_path = TMP_DIR + SEARCH_COORDS + "_split" + str(idx) + "_filtered.txt"
+        fil_path = TMP_DIR + SEARCH_COORDS + \
+            "_split" + str(idx) + "_filtered.txt"
         filtered_lines = open(fil_path).readlines()
         export_file.writelines(filtered_lines)
     export_file.close()
@@ -143,4 +123,5 @@ else:
 os.system(f'cp {BASE_DIR}/*/generated/* {ALL_PATH}')
 
 print("\nResults:")
-os.system(f'echo "Found" $(find {BASE_DIR}*/generated/* | wc -l) "matches out of" $(cat seed_bank/* | wc -l) "total"')
+os.system(
+    f'echo "Found" $(find {BASE_DIR}*/generated/* | wc -l) "matches out of" $(cat seed_bank/* | wc -l) "total"')
