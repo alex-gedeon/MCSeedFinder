@@ -3,7 +3,8 @@ import os
 from PIL import Image, ImageDraw
 import multiprocessing as mp
 import time
-import glob, shutil
+import glob
+import shutil
 
 
 def scan_quadseeds(qx, qy, search_time, quadfile):
@@ -25,59 +26,6 @@ def scan_quadseeds(qx, qy, search_time, quadfile):
         qf.writelines(lines)
         qf.close()
     print(f'Found {len(lines)} quad witch hut seeds!')
-
-
-def filter_quadseeds(quadfile, outfile):
-    if os.path.exists(outfile):
-        os.remove(outfile)
-    print("\nFiltering seeds as per generator.h...")
-    # Open and sort quadfile
-    quads = open(quadfile).readlines()
-    quads.sort()
-
-    # Internal function to search for seeds
-    def search_seeds(seedlist):
-        for line in seedlist:
-            line = int(line.strip())
-            os.system(
-                f'./find_compactbiomes {int(line)} {int(line) + 1} >> {outfile}')
-
-    def search_seeds_reporter(seedlist):
-        last_perc = -1
-        for idx, line in enumerate(seedlist):
-            # If at percentage point, print out
-            if round(idx/len(seedlist) * 100) > last_perc:
-                print(f"\rProgress: {round(idx/len(seedlist) * 100)}%", end="")
-                last_perc = round(idx/len(seedlist) * 100)
-            line = int(line.strip())
-            os.system(
-                f'./find_compactbiomes {int(line)} {int(line) + 1} >> {outfile}')
-        print("\rProgress: 100%   ")
-
-    # Determine number of processes and splits per process
-    num_processes = 1  # mp.cpu_count()
-    even_split = len(quads) // num_processes
-
-    processpool = []
-    # Create a process for each split, split into even chunks
-    for idx in range(num_processes):
-        # If last index, give rest
-        if idx == num_processes - 1:
-            a = mp.Process(target=search_seeds_reporter,
-                           args=[quads[idx*even_split:]])
-        else:
-            a = mp.Process(target=search_seeds, args=[
-                           quads[idx*even_split:idx*even_split + even_split]])
-        a.start()
-        processpool.append(a)
-
-    # Attempt to join processes
-    for process in processpool:
-        process.join()
-
-    num_found = len(open(outfile).readlines())
-
-    print(f"Searched {len(quads)} seeds, found {num_found} matches!")
 
 
 def convert_all_ppm_to_png(seedlist, folder, xsize=1024, ysize=512):
@@ -235,24 +183,29 @@ def get_filter(given_filter=None, filter_path='biome_filters.txt'):
         filter_selection = given_filter
     user_filter = fil_lines[filter_selection]
     user_filter = [val.strip() for val in user_filter.split(', ')]
-    return user_filter
+    return user_filter, filter_selection
+
 
 def get_search_coords(bank_folder="seed_bank/"):
     """
     Get all coords from seed bank files.
-    
+
     Example filename: "seed_bank/quadbank_8x0y.txt"
     """
-    s_coords = [fil.split("/")[1].split("_")[1].split(".")[0] for fil in glob.glob(bank_folder + "*.txt")]
+    s_coords = [fil.split("/")[1].split("_")[1].split(".")[0]
+                for fil in glob.glob(bank_folder + "*.txt")]
     if len(s_coords) == 0:
-        print(f"Error: no seed files found in '{bank_folder}', generate some with ./find_quadhuts")
+        print(
+            f"Error: no seed files found in '{bank_folder}', generate some with ./find_quadhuts")
         exit(1)
     return s_coords
 
+
 def make_splits(master_file, search_coords, tmp_dir="quad_scans/tmp/"):
+    """Generate equal splits of master seedfile in tmp_dir."""
     if os.path.exists(tmp_dir):
-        shutil.rmtree("quad_scans/tmp/")
-        ensure_scan_structure()
+        shutil.rmtree(tmp_dir)
+        os.mkdir(tmp_dir)
 
     # Read in master file
     master_lines = open(master_file).readlines()
@@ -265,15 +218,70 @@ def make_splits(master_file, search_coords, tmp_dir="quad_scans/tmp/"):
             split = master_lines[idx*even_split:]
         else:
             split = master_lines[idx*even_split:idx *
-                                    even_split + even_split]
+                                 even_split + even_split]
         with open(tmp_dir + search_coords + "_split" + str(idx) + ".txt", 'w') as outfile:
             outfile.writelines(split)
 
 
-
-def ensure_scan_structure(scan_folder="quad_scans/", tmp_dir="tmp/"):
+def ensure_scan_structure(filter_id, search_range, scan_folder="quad_scans/", tmp_dir="tmp/"):
     """Ensures base folder structure exists."""
     if not os.path.exists(scan_folder):
         os.mkdir(scan_folder)
     if not os.path.exists(scan_folder + tmp_dir):
         os.mkdir(scan_folder + tmp_dir)
+    filter_path = scan_folder + f"filter{filter_id}_{search_range}r/"
+    if not os.path.exists(filter_path):
+        os.mkdir(filter_path)
+    if os.path.exists(filter_path + "all/"):
+        shutil.rmtree(filter_path + "all/")
+    os.mkdir(filter_path + "all/")
+
+
+def run_biome_scan(biome_ids, search_coords, search_range, tmp_dir="quad_scans/tmp/"):
+    """
+    Scans splits of seedbank file in C.
+
+    Writes to filtered files per split in tmp_dir, waits until complete.
+    """
+    args = [
+        './find_filtered_biomes',
+        str(mp.cpu_count()),
+        str(search_range),
+        tmp_dir + search_coords + ".txt"
+    ]
+    args += biome_ids
+
+    filter_process = subprocess.Popen(args)
+    filter_process.wait()
+
+
+def aggregate_scan(filter_id, search_coords, search_range, scan_folder="quad_scans/", tmp_dir="quad_scans/tmp/"):
+    base_dir = f"{scan_folder}filter{filter_id}_{search_range}r/"
+    export_folder = base_dir + search_coords + "/"
+    if not os.path.exists(base_dir):
+        os.mkdir(base_dir)
+    if not os.path.exists(export_folder):
+        os.mkdir(export_folder)
+
+    EXPORT_PATH = export_folder + search_coords + "_filtered.txt"
+    export_file = open(EXPORT_PATH, "w")
+
+    for idx in range(mp.cpu_count()):
+        fil_path = tmp_dir + search_coords + \
+            "_split" + str(idx) + "_filtered.txt"
+        filtered_lines = open(fil_path).readlines()
+        export_file.writelines(filtered_lines)
+    export_file.close()
+
+    return EXPORT_PATH
+
+
+def generate_images(export_filepath):
+    generated_path = os.path.dirname(export_filepath) + "/generated/"
+    filtered_lines = open(export_filepath).readlines()
+    if os.path.exists(generated_path):
+        shutil.rmtree(generated_path)
+    convert_all_ppm_to_png(filtered_lines, generated_path)
+
+    all_path = os.path.dirname(os.path.dirname(export_filepath)) + "/all/"
+    os.system(f'cp {generated_path}* {all_path} 2>/dev/null')
