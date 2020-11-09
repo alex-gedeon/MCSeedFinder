@@ -6,9 +6,6 @@ import subprocess
 import click
 
 
-
-
-
 @click.command()
 @click.option('--search_range', type=int, default=1024)
 @click.option('--biome_filter', type=int, default=None)
@@ -19,8 +16,12 @@ def main(search_range, biome_filter):
     search_coords = ut.get_search_coords()
     print(search_coords)
 
+    ut.ensure_scan_structure()
     for s_idx, s_coord in enumerate(search_coords):
-        pass
+        print(
+            f"Starting search in {s_coord}, no. {s_idx + 1}/{len(search_coords)} total")
+        master_filepath = f"seed_bank/quadbank_{s_coord}.txt"
+        ut.make_splits(master_filepath, s_coord)
 
 
 if __name__ == "__main__":
@@ -40,39 +41,8 @@ for s_idx, SEARCH_COORDS in enumerate(s_coords):
     MASTER_FILE = f"seed_bank/quadbank_{SEARCH_COORDS}.txt"
     EXPORT_FOLDER = BASE_DIR + SEARCH_COORDS + "/"
 
-    def make_splits():
-        if not os.path.exists(TMP_DIR):
-            os.mkdir("quad_scans/tmp/")
-        else:
-            shutil.rmtree("quad_scans/tmp/")
-            os.mkdir("quad_scans/tmp/")
-
-        # Read in master file
-        master_lines = open(MASTER_FILE).readlines()
-        # master_lines.sort()
-
-        # Split master file to separate files
-        num_splits = mp.cpu_count()
-        even_split = len(master_lines) // num_splits
-        for idx in range(num_splits):
-            if idx == num_splits - 1:
-                split = master_lines[idx*even_split:]
-            else:
-                split = master_lines[idx*even_split:idx *
-                                     even_split + even_split]
-            with open(TMP_DIR + SEARCH_COORDS + "_split" + str(idx) + ".txt", 'w') as outfile:
-                outfile.writelines(split)
-
-    # make_splits()
-
-    # Set up filter
-    # user_filter = ["jungle", "shattered_savanna", "ice_spikes", "warm_ocean", "mushroom_fields"]
-    # filter = ["jungle", "shattered_savanna", "ice_spikes", "badlands", "frozen_ocean", "warm_ocean"]
-    # filter = ["giant_tree_taiga_hills", "jungle", "shattered_savanna", "ice_spikes", "badlands", "frozen_ocean", "warm_ocean"]
     idict = ut.get_lookup_table()
     enum_ints = [str(idict[key]) for key in user_filter]
-
-    # os.system(f'./find_filtered_biomes {mp.cpu_count()} 1024 {TMP_DIR + SEARCH_COORDS + ".txt"} {" ".join(enum_ints)}')
 
     args = [
         './find_filtered_biomes',

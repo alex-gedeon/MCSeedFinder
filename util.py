@@ -3,6 +3,7 @@ import os
 from PIL import Image, ImageDraw
 import multiprocessing as mp
 import time
+import glob, shutil
 
 
 def scan_quadseeds(qx, qy, search_time, quadfile):
@@ -237,14 +238,42 @@ def get_filter(given_filter=None, filter_path='biome_filters.txt'):
     return user_filter
 
 def get_search_coords(bank_folder="seed_bank/"):
-    if not os.path.exists(bank_folder):
-        os.mkdir(bank_folder)
-    s_coords = []
-    for _, _, files in os.walk(bank_folder):
-        for fil in files:
-            fil = fil.split("_")[1].split(".")[0]
-            s_coords.append(fil)
+    """
+    Get all coords from seed bank files.
+    
+    Example filename: "seed_bank/quadbank_8x0y.txt"
+    """
+    s_coords = [fil.split("/")[1].split("_")[1].split(".")[0] for fil in glob.glob(bank_folder + "*.txt")]
     if len(s_coords) == 0:
-        print("Error: no seed files found, generate some with ./find_quadhuts")
+        print(f"Error: no seed files found in '{bank_folder}', generate some with ./find_quadhuts")
         exit(1)
     return s_coords
+
+def make_splits(master_file, search_coords, tmp_dir="quad_scans/tmp/"):
+    if os.path.exists(tmp_dir):
+        shutil.rmtree("quad_scans/tmp/")
+        ensure_scan_structure()
+
+    # Read in master file
+    master_lines = open(master_file).readlines()
+
+    # Split master file to separate files
+    num_splits = mp.cpu_count()
+    even_split = len(master_lines) // num_splits
+    for idx in range(num_splits):
+        if idx == num_splits - 1:
+            split = master_lines[idx*even_split:]
+        else:
+            split = master_lines[idx*even_split:idx *
+                                    even_split + even_split]
+        with open(tmp_dir + search_coords + "_split" + str(idx) + ".txt", 'w') as outfile:
+            outfile.writelines(split)
+
+
+
+def ensure_scan_structure(scan_folder="quad_scans/", tmp_dir="tmp/"):
+    """Ensures base folder structure exists."""
+    if not os.path.exists(scan_folder):
+        os.mkdir(scan_folder)
+    if not os.path.exists(scan_folder + tmp_dir):
+        os.mkdir(scan_folder + tmp_dir)
