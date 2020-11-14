@@ -186,12 +186,14 @@ def get_filter(given_filter=None, filter_path='biome_filters.txt'):
     return user_filter, filter_selection
 
 
-def get_search_coords(bank_folder="seed_bank/"):
+def get_search_coords(bank_folder="scan_bank/"):
     """
     Get all coords from seed bank files.
 
-    Example filename: "seed_bank/quadbank_8x0y.txt"
+    Example filename: "scan_bank/quadbank_8x0y.txt"
     """
+    if not os.path.exists(bank_folder):
+        os.mkdir(bank_folder)
     s_coords = [fil.split("/")[1].split("_")[1].split(".")[0]
                 for fil in glob.glob(bank_folder + "*.txt")]
     if len(s_coords) == 0:

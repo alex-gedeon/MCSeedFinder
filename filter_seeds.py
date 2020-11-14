@@ -22,7 +22,7 @@ def main(search_range, biome_filter):
     for s_idx, s_coord in enumerate(search_coords):
         print(
             f"Starting search in {s_coord}, no. {s_idx + 1}/{len(search_coords)}")
-        master_filepath = f"seed_bank/quadbank_{s_coord}.txt"
+        master_filepath = f"scan_bank/quadbank_{s_coord}.txt"
         ut.make_splits(master_filepath, s_coord)
 
         # Scan master file in C and aggregate results
@@ -31,7 +31,6 @@ def main(search_range, biome_filter):
 
         # Generate images of minecraft world
         ut.generate_images(export_file, s_coord)
-        exit()
 
     all_path = f"quad_scans/filter{filter_id}_{search_range}r/all/"
     print("\nResults:")

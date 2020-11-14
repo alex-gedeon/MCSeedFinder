@@ -7,7 +7,7 @@ seeds/
 image_generator
 *.a
 quad_scans/*
-seed_bank/*
+scan_bank/*
 env/*
 .vscode/*
 *.egg-info
