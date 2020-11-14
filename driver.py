@@ -30,7 +30,8 @@ def main(search_range, biome_filter):
         export_file = ut.aggregate_scan(filter_id, s_coord, search_range)
 
         # Generate images of minecraft world
-        ut.generate_images(export_file)
+        ut.generate_images(export_file, s_coord)
+        exit()
 
     all_path = f"quad_scans/filter{filter_id}_{search_range}r/all/"
     print("\nResults:")

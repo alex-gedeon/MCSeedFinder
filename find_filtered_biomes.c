@@ -4,7 +4,6 @@
 
 
 struct compactinfo_t {
-    int64_t seedStart, seedEnd;
     unsigned int range;
     BiomeFilter filter;
     int withHut, withMonument;

@@ -277,14 +277,63 @@ def aggregate_scan(filter_id, search_coords, search_range, scan_folder="quad_sca
     return EXPORT_PATH
 
 
-def generate_images(export_filepath):
+def generate_images(export_filepath, s_coord):
     """Generate png images of matched seeds."""
     generated_path = os.path.dirname(export_filepath) + "/generated/"
     filtered_lines = open(export_filepath).readlines()
     if os.path.exists(generated_path):
         shutil.rmtree(generated_path)
-    convert_all_ppm_to_png(filtered_lines, generated_path)
+    os.mkdir(generated_path)
+    convert_ppm_parallelized(
+        filtered_lines, export_filepath, generated_path, s_coord)
 
     # Copy images to all/ directory also
     all_path = os.path.dirname(os.path.dirname(export_filepath)) + "/all/"
-    os.system(f'cp {generated_path}* {all_path} 2>/dev/null')  # ignore error if no matches
+    # ignore error if no matches
+    os.system(f'cp {generated_path}* {all_path} 2>/dev/null')
+
+
+def convert_ppm_parallelized(filtered_lines, export_filepath, generated_path, s_coord, tmp_dir='quad_scans/tmp/'):
+    # call C code
+    # TODO: fix path to splits
+    os.system(
+        f'./generate_images {generated_path} {tmp_dir+s_coord+".txt"} 1024 512 16')
+
+    def convert_single_ppm(seed):
+        ppm_filepath = generated_path + str(seed)
+
+        # Convert ppm to png, remove ppm to save space
+        im = Image.open(f'{ppm_filepath}.ppm')
+        draw = ImageDraw.Draw(im)
+        draw.rectangle([im.width//2 - 20, im.height//2 - 20, im.width //
+                        2 + 20, im.height//2 + 20], width=4, outline="#ff0000")
+        im.save(f'{ppm_filepath}.png')
+        os.remove(f'{ppm_filepath}.ppm')
+
+    def convert_batch_ppm(miniseedlist):
+        for seed in miniseedlist:
+            seed = int(seed.strip())
+            convert_single_ppm(seed)
+
+    # Determine number of processes and splits per process
+    num_processes = mp.cpu_count()
+    even_split = len(filtered_lines) // num_processes
+
+    processpool = []
+
+    # Create a process for each split, split into even chunks
+    for idx in range(num_processes):
+        # If last index, give rest
+        if idx == num_processes - 1:
+            a = mp.Process(target=convert_batch_ppm, args=[
+                           filtered_lines[idx*even_split:]])
+        else:
+            a = mp.Process(target=convert_batch_ppm, args=[
+                           filtered_lines[idx*even_split:idx*even_split + even_split]])
+
+        a.start()
+        processpool.append(a)
+
+    # Attempt to join processes
+    for process in processpool:
+        process.join()
