@@ -186,11 +186,11 @@ def get_filter(given_filter=None, filter_path='biome_filters.txt'):
     return user_filter, filter_selection
 
 
-def get_search_coords(bank_folder="scan_bank/"):
+def get_search_coords(bank_folder="quad_bank/"):
     """
     Get all coords from seed bank files.
 
-    Example filename: "scan_bank/quadbank_8x0y.txt"
+    Example filename: "quad_bank/quadbank_8x0y.txt"
     """
     if not os.path.exists(bank_folder):
         os.mkdir(bank_folder)
@@ -203,7 +203,7 @@ def get_search_coords(bank_folder="scan_bank/"):
     return s_coords
 
 
-def make_splits(master_file, search_coords, tmp_dir="quad_scans/tmp/"):
+def make_splits(master_file, search_coords, tmp_dir="biome_scans/tmp/"):
     """Generate equal splits of master seedfile in tmp_dir."""
     if os.path.exists(tmp_dir):
         shutil.rmtree(tmp_dir)
@@ -225,7 +225,7 @@ def make_splits(master_file, search_coords, tmp_dir="quad_scans/tmp/"):
             outfile.writelines(split)
 
 
-def ensure_scan_structure(filter_id, search_range, scan_folder="quad_scans/", tmp_dir="tmp/"):
+def ensure_scan_structure(filter_id, search_range, scan_folder="biome_scans/", tmp_dir="tmp/"):
     """Ensures base folder structure exists."""
     if not os.path.exists(scan_folder):
         os.mkdir(scan_folder)
@@ -239,7 +239,7 @@ def ensure_scan_structure(filter_id, search_range, scan_folder="quad_scans/", tm
     os.mkdir(filter_path + "all/")
 
 
-def run_biome_scan(biome_ids, search_coords, search_range, tmp_dir="quad_scans/tmp/"):
+def run_biome_scan(biome_ids, search_coords, search_range, tmp_dir="biome_scans/tmp/"):
     """
     Scans splits of seedbank file in C.
 
@@ -257,7 +257,7 @@ def run_biome_scan(biome_ids, search_coords, search_range, tmp_dir="quad_scans/t
     filter_process.wait()
 
 
-def aggregate_scan(filter_id, search_coords, search_range, scan_folder="quad_scans/", tmp_dir="quad_scans/tmp/"):
+def aggregate_scan(filter_id, search_coords, search_range, scan_folder="biome_scans/", tmp_dir="biome_scans/tmp/"):
     """Aggregate filtered splits and return path."""
     base_dir = f"{scan_folder}filter{filter_id}_{search_range}r/"
     export_folder = base_dir + search_coords + "/"
@@ -295,7 +295,7 @@ def generate_images(export_filepath, s_coord):
     os.system(f'cp {generated_path}* {all_path} 2>/dev/null')
 
 
-def convert_ppm_parallelized(filtered_lines, export_filepath, generated_path, s_coord, tmp_dir='quad_scans/tmp/'):
+def convert_ppm_parallelized(filtered_lines, export_filepath, generated_path, s_coord, tmp_dir='biome_scans/tmp/'):
     # call C code
     # TODO: fix path to splits
     os.system(
