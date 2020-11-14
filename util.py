@@ -296,10 +296,20 @@ def generate_images(export_filepath, s_coord):
 
 
 def convert_ppm_parallelized(filtered_lines, export_filepath, generated_path, s_coord, tmp_dir='biome_scans/tmp/'):
-    # call C code
-    # TODO: fix path to splits
-    os.system(
-        f'./generate_images {generated_path} {tmp_dir+s_coord+".txt"} 1024 512 16')
+    """Convert all filtered seeds to ppm, then png images."""
+
+    # Call C code to convert to ppm images
+    process = subprocess.Popen([
+        './generate_images',
+        generated_path,
+        tmp_dir+s_coord+".txt",
+        str(1024),
+        str(512),
+        str(16)
+    ])
+    process.wait()
+
+    # Convert ppms to pngs with parallelism
 
     def convert_single_ppm(seed):
         ppm_filepath = generated_path + str(seed)
