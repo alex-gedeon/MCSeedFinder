@@ -6,8 +6,8 @@ find_quadhuts
 seeds/
 image_generator
 *.a
-quad_scans/*
-scan_bank/*
+biome_scans/*
+quad_bank/*
 env/*
 .vscode/*
 *.egg-info
