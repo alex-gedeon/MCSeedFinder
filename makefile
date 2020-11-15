@@ -14,12 +14,12 @@ endif
 
 .PHONY : all release debug libcubiomes clean
 
-all: release generate_images
+all: release
 
 debug: CFLAGS += -DDEBUG -O0 -ggdb3
-debug: libcubiomes find_quadhuts image_generator find_filtered_biomes
+debug: find_quadhuts generate_images find_filtered_biomes
 release: CFLAGS += -O3 -march=native
-release: libcubiomes find_quadhuts image_generator find_filtered_biomes
+release: find_quadhuts generate_images find_filtered_biomes
 
 libcubiomes: CFLAGS += -fPIC
 libcubiomes: layers.o generator.o finders.o util.o
