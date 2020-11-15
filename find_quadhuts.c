@@ -60,17 +60,7 @@ int main(int argc, char *argv[])
             else
                 mcversion = MC_1_16;
         }
-        // else
-        // {
-        //     printf("MC version not specified. Defaulting to 1.16\n");
-        // }
     }
-    // else
-    // {
-    //     printf("Usage:\n"
-    //            "find_quadhuts [regionX] [regionZ] [mcversion]\n"
-    //            "Defaulting to origin.\n\n");
-    // }
 
     regPosX -= 1;
     regPosZ -= 1;
@@ -86,11 +76,6 @@ int main(int argc, char *argv[])
 
     setupGenerator(&g, mcversion);
     
-// #if defined(_WIN32)
-//     _mkdir("./seeds");
-// #else 
-//     mkdir("./seeds", 0773);
-// #endif
 
 #if 0
     sprintf(seedFileName, "./seeds/quadbase_ideal_%d.txt", featureConfig.salt);
@@ -112,8 +97,6 @@ int main(int argc, char *argv[])
 
     if (access(seedFileName, F_OK))
     {
-        // printf("Seed base file does not exist: Creating new one.\n"
-        //        "This can take a while...\n");
         int threads = 6;
         search4QuadBases(seedFileName, threads, featureConfig, radius, lbitset);
     }
@@ -151,13 +134,6 @@ int main(int argc, char *argv[])
         qpos[2] = getStructurePos(featureConfig, base, 1+regPosX, 0+regPosZ, NULL);
         qpos[3] = getStructurePos(featureConfig, base, 1+regPosX, 1+regPosZ, NULL);
 
-        /*
-        for (j = 0; j < 4; j++)
-        {
-            printf("(%d,%d) ", qpos[j].x, qpos[j].z);
-        }
-        printf("\n");
-        */
 
         if (check_swamp_hut_specifics)
         {

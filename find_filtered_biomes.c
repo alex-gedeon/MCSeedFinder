@@ -62,9 +62,7 @@ int main(int argc, char *argv[]) {
     int * biome_filter = (int *) malloc(sizeof(int) * (num_biomes));
     for(int i = NUMPARAMS; i < argc; ++i) {
         biome_filter[i-NUMPARAMS] = atoi(argv[i]);
-        // printf(" %d", atoi(argv[i]));
     }
-    // printf("\n");
 
 
     initBiomes();
@@ -101,7 +99,6 @@ int main(int argc, char *argv[]) {
         info[t].num_threads = num_threads;
 
     }
-    // exit(1);
 
     // start threads
     for (unsigned int t = 0; t < num_threads; ++t) {
@@ -175,8 +172,6 @@ static void *searchCompactBiomesThread(void *data) {
         sscanf(seed, "%" PRId64, &curr_seed);
 
         if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, curr_seed, ax, az, w, h, info.filter, 1) > 0) {
-            // printf("%" PRId64 "\n", curr_seed);
-            // fflush(stdout);
             fprintf(outFileptr, "%" PRId64 "\n", curr_seed);
             hits++;
             if(info.num_threads * hits > 200) {

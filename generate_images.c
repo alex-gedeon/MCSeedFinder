@@ -22,7 +22,6 @@ static void *generate_image_thread(void *data);
 
 int main(int argc, char *argv[])
 {
-
     // Parse args
     //   argv[1]: folder to save in
     //   argv[2]: filepath to splits
@@ -146,16 +145,15 @@ static void *generate_image_thread(void *data)
         // Allocate a sufficient buffer for the biomes and for the image pixels.
         int *biomeIds = allocCache(layer, areaWidth, areaHeight);
         unsigned char *rgb = (unsigned char *)malloc(3 * imgWidth * imgHeight);
-        // printf("%s\n", outfile);
         // Apply the seed only for the required layers and generate the area.
         setWorldSeed(layer, curr_seed);
         genArea(layer, biomeIds, info.areaX, info.areaZ, areaWidth, areaHeight);
 
-        // // Map the biomes to a color buffer and save to an image.
+        // Map the biomes to a color buffer and save to an image.
         biomesToImage(rgb, biomeColours, biomeIds, areaWidth, areaHeight, scale, 2);
         savePPM(outfile, rgb, imgWidth, imgHeight);
 
-        // // Clean up.
+        // Clean up.
         free(biomeIds);
         free(rgb);
     }
