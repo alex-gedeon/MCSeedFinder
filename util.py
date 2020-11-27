@@ -168,7 +168,14 @@ def get_filter(given_filter=None, filter_path='biome_filters.txt'):
     """Read in user-defined filter from file."""
     if not os.path.exists(filter_path):
         open(filter_path, 'w').close()
-    fil_lines = open(filter_path).readlines()
+    fil_lines = {}
+    with open(filter_path) as filter_file:
+        for line in filter_file:
+            if line.strip().startswith('#'):
+                continue
+            fil_lines[int(line.strip().split(': ')[0])] = ", ".join(line.strip().split(": ")[1:])
+
+    # fil_lines = open(filter_path).readlines()
     if len(fil_lines) == 0:
         print("Error: no filters found in", filter_path)
         exit(1)
@@ -176,7 +183,7 @@ def get_filter(given_filter=None, filter_path='biome_filters.txt'):
     # Only query user if option is not used
     if given_filter is None:
         print("Select a filter out of the following:")
-        for idx, line in enumerate(fil_lines):
+        for idx, line in fil_lines.items():
             print(f"    {idx}: {line.strip()}")
         filter_selection = int(input())
     else:
@@ -232,10 +239,9 @@ def ensure_scan_structure(filter_id, search_range, scan_folder="biome_scans/", t
     if not os.path.exists(scan_folder + tmp_dir):
         os.mkdir(scan_folder + tmp_dir)
     filter_path = scan_folder + f"filter{filter_id}_{search_range}r/"
-    if not os.path.exists(filter_path):
-        os.mkdir(filter_path)
-    if os.path.exists(filter_path + "all/"):
-        shutil.rmtree(filter_path + "all/")
+    if os.path.exists(filter_path):
+        shutil.rmtree(filter_path)
+    os.mkdir(filter_path)
     os.mkdir(filter_path + "all/")
 
 

@@ -18,7 +18,7 @@ python3 filter_seeds.py --biome_filter=0 --search_range=1024
 
 ### Arguments
 
-This script takes in two optional arguments: search range, and a biome filter. The search range is set to a default of 1024, and specifies the distance to search in both the X and Z directions around the origin. The biome filter is given as the 0-indexed entry in ```biome_filters.txt```, where a ```", "``` separated list of biomes is defined for each line, with biomes named as per https://minecraft.gamepedia.com/Biome/ID, such as ```jungle, shattered_savanna, ice_spikes, warm_ocean, mushroom_fields```.
+This script takes in two optional arguments: search range, and a biome filter. The search range is set to a default of 1024, and specifies the distance to search in both the X and Z directions around the origin. The biome filter is given as a labeled entry in ```biome_filters.txt```, where a ```", "``` separated list of biomes is defined for each line, starting with a label ```{label}:```, with biomes named as per https://minecraft.gamepedia.com/Biome/ID, such as ```0: jungle, shattered_savanna, ice_spikes, warm_ocean, mushroom_fields```.
 
 ### Quad Witch Hut Seed Generation
 

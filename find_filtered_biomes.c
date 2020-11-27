@@ -174,9 +174,9 @@ static void *searchCompactBiomesThread(void *data) {
         if (checkForBiomes(&g, L_VORONOI_ZOOM_1, cache, curr_seed, ax, az, w, h, info.filter, 1) > 0) {
             fprintf(outFileptr, "%" PRId64 "\n", curr_seed);
             hits++;
-            if(info.num_threads * hits > 200) {
+            if(info.num_threads * hits > 100) {
                 if(info.reporter) {
-                    printf("\nHit 200, stopping\n");
+                    printf("\nHit 100, stopping\n");
                     goto max_hits;
                 }
                 break;
